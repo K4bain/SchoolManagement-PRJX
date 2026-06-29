@@ -4,7 +4,7 @@ A fullstack school management platform built with Next.js, featuring role-based 
 
 ## Live Demo
 
-🔗 [View Live Demo](https://your-deployment-url.vercel.app) *(deploy soon)*
+🔗 [View Live Demo](https://school-management-jet-rho.vercel.app)
 
 ## Features
 
