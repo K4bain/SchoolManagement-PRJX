@@ -1,0 +1,145 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+}
+
+enum Day {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  teacher  Teacher?
+  student  Student?
+
+  @@map("users")
+}
+
+model Teacher {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  subjects    Subject[]
+  attendances Attendance[]
+
+  @@map("teachers")
+}
+
+model Student {
+  id      String  @id @default(cuid())
+  userId  String  @unique
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  classId String?
+  class   Class?  @relation(fields: [classId], references: [id])
+
+  grades      Grade[]
+  attendances Attendance[]
+
+  @@map("students")
+}
+
+model Class {
+  id   String @id @default(cuid())
+  name String @unique
+  year Int
+
+  students   Student[]
+  subjects   Subject[]
+  timetables Timetable[]
+
+  @@map("classes")
+}
+
+model Subject {
+  id        String  @id @default(cuid())
+  name      String
+  classId   String
+  class     Class   @relation(fields: [classId], references: [id])
+  teacherId String
+  teacher   Teacher @relation(fields: [teacherId], references: [id])
+
+  grades      Grade[]
+  attendances Attendance[]
+  timetables  Timetable[]
+
+  @@map("subjects")
+}
+
+model Grade {
+  id        String   @id @default(cuid())
+  score     Float
+  label     String?
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  subjectId String
+  subject   Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@map("grades")
+}
+
+model Attendance {
+  id        String           @id @default(cuid())
+  date      DateTime         @db.Date
+  status    AttendanceStatus
+  studentId String
+  student   Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  subjectId String
+  subject   Subject          @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  markedBy  String
+  teacher   Teacher          @relation(fields: [markedBy], references: [id])
+
+  @@unique([studentId, subjectId, date])
+  @@map("attendances")
+}
+
+model Timetable {
+  id        String @id @default(cuid())
+  day       Day
+  startTime String
+  endTime   String
+  classId   String
+  class     Class   @relation(fields: [classId], references: [id])
+  subjectId String
+  subject   Subject @relation(fields: [subjectId], references: [id])
+
+  @@map("timetables")
+}
+
+model Announcement {
+  id        String   @id @default(cuid())
+  title     String
+  body      String
+  createdAt DateTime @default(now())
+
+  @@map("announcements")
+}
