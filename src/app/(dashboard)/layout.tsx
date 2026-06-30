@@ -25,9 +25,9 @@ export default function DashboardLayout({
         <AppSidebar />
         <SidebarInset>
           <SiteHeader />
-          <main className="flex-1 overflow-y-auto p-4 lg:p-6">
+          <div className="flex-1 overflow-y-auto p-4 lg:p-6">
             <PageTransition>{children}</PageTransition>
-          </main>
+          </div>
         </SidebarInset>
         <CommandPalette />
       </SidebarProvider>

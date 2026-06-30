@@ -8,7 +8,10 @@ export async function GET(
   const { id } = await params;
   const teacher = await prisma.teacher.findUnique({
     where: { id },
-    include: { user: true, subjects: true },
+    include: {
+      user: true,
+      subjects: { include: { class: true } },
+    },
   });
   if (!teacher) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json(teacher);
@@ -19,10 +22,27 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const { name, email } = await req.json();
+  const { name, email, subjectIds } = await req.json();
   const teacher = await prisma.teacher.findUnique({ where: { id } });
   if (!teacher) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  await prisma.user.update({ where: { id: teacher.userId }, data: { name, email } });
+
+  if (name || email) {
+    await prisma.user.update({ where: { id: teacher.userId }, data: { name, email } });
+  }
+
+  if (subjectIds !== undefined) {
+    await prisma.subject.updateMany({
+      where: { teacherId: id },
+      data: { teacherId: null as any },
+    });
+    for (const subjectId of subjectIds) {
+      await prisma.subject.update({
+        where: { id: subjectId },
+        data: { teacherId: id },
+      }).catch(() => {});
+    }
+  }
+
   return NextResponse.json({ success: true });
 }
 

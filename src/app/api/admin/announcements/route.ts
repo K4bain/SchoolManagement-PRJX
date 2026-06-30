@@ -9,8 +9,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const { title, body } = await req.json();
-  if (!title || !body) return NextResponse.json({ error: "Missing fields" }, { status: 400 });
-  const announcement = await prisma.announcement.create({ data: { title, body } });
+  const { title, body, content } = await req.json();
+  const announcementBody = body || content;
+  if (!title || !announcementBody) return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+  const announcement = await prisma.announcement.create({ data: { title, body: announcementBody } });
   return NextResponse.json(announcement, { status: 201 });
 }

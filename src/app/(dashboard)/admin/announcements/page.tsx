@@ -17,21 +17,13 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Plus, Pencil, Trash2, Bell, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface Announcement {
   id: string;
   title: string;
-  content: string;
-  targetRole: string | null;
+  body: string;
   createdAt: string;
 }
 
@@ -42,8 +34,7 @@ export default function AnnouncementsPage() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Announcement | null>(null);
   const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [targetRole, setTargetRole] = useState("ALL");
+  const [body, setBody] = useState("");
 
   const fetchData = () => {
     setLoading(true);
@@ -59,15 +50,14 @@ export default function AnnouncementsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    const body = { title, content, targetRole };
-    const method = editing ? "PATCH" : "POST";
     const url = editing ? `/api/admin/announcements/${editing.id}` : "/api/admin/announcements";
+    const method = editing ? "PATCH" : "POST";
 
     try {
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify({ title, body }),
       });
 
       if (res.ok) {
@@ -98,7 +88,7 @@ export default function AnnouncementsPage() {
   };
 
   const resetForm = () => {
-    setTitle(""); setContent(""); setTargetRole("ALL"); setEditing(null);
+    setTitle(""); setBody(""); setEditing(null);
   };
 
   const columns: ColumnDef<Announcement, any>[] = [
@@ -108,19 +98,10 @@ export default function AnnouncementsPage() {
       cell: ({ row }) => <span className="font-medium">{row.original.title}</span>,
     },
     {
-      accessorKey: "content",
+      accessorKey: "body",
       header: "Content",
       cell: ({ row }) => (
-        <span className="text-muted-foreground line-clamp-1">{row.original.content}</span>
-      ),
-    },
-    {
-      accessorKey: "targetRole",
-      header: "Target",
-      cell: ({ row }) => (
-        <Badge variant={row.original.targetRole === "ALL" ? "default" : "secondary"}>
-          {row.original.targetRole || "ALL"}
-        </Badge>
+        <span className="text-muted-foreground line-clamp-1">{row.original.body}</span>
       ),
     },
     {
@@ -136,8 +117,7 @@ export default function AnnouncementsPage() {
           <Button variant="ghost" size="icon" onClick={() => {
             setEditing(row.original);
             setTitle(row.original.title);
-            setContent(row.original.content);
-            setTargetRole(row.original.targetRole || "ALL");
+            setBody(row.original.body);
             setOpen(true);
           }}>
             <Pencil className="h-4 w-4" />
@@ -179,25 +159,12 @@ export default function AnnouncementsPage() {
               <div className="space-y-2">
                 <Label>Content</Label>
                 <Textarea
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
+                  value={body}
+                  onChange={(e) => setBody(e.target.value)}
                   placeholder="Write your announcement here..."
                   required
                   rows={4}
                 />
-              </div>
-              <div className="space-y-2">
-                <Label>Target Audience</Label>
-                <Select value={targetRole} onValueChange={(v) => setTargetRole(v ?? "ALL")}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ALL">Everyone</SelectItem>
-                    <SelectItem value="STUDENT">Students</SelectItem>
-                    <SelectItem value="TEACHER">Teachers</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
               <Button type="submit" className="w-full" disabled={submitting}>
                 {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

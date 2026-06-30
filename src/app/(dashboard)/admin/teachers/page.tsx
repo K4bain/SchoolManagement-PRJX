@@ -19,12 +19,16 @@ import { Input } from "@/components/ui/input";
 import { Plus, Pencil, Trash2, GraduationCap, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
+interface TeacherClass {
+  id: string;
+  name: string;
+}
+
 interface Teacher {
   id: string;
   userId: string;
   user: { id: string; name: string; email: string };
-  subjects: { id: string; name: string }[];
-  classes: { id: string; name: string }[];
+  subjects: { id: string; name: string; class: TeacherClass }[];
 }
 
 export default function TeachersPage() {
@@ -36,20 +40,18 @@ export default function TeachersPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [subjects, setSubjects] = useState<{ id: string; name: string }[]>([]);
-  const [classes, setClasses] = useState<{ id: string; name: string }[]>([]);
+  const [allSubjects, setAllSubjects] = useState<{ id: string; name: string; class: TeacherClass }[]>([]);
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
-  const [selectedClasses, setSelectedClasses] = useState<string[]>([]);
 
   const fetchData = () => {
     setLoading(true);
     Promise.all([
       fetch("/api/admin/teachers").then((r) => r.json()),
-      fetch("/api/admin/classes").then((r) => r.json()),
+      fetch("/api/admin/subjects").then((r) => r.json()),
     ])
-      .then(([teachersData, classesData]) => {
+      .then(([teachersData, subjectsData]) => {
         setTeachers(teachersData);
-        setClasses(classesData.map((c: any) => ({ id: c.id, name: c.name })));
+        setAllSubjects(subjectsData);
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -61,8 +63,8 @@ export default function TeachersPage() {
     e.preventDefault();
     setSubmitting(true);
     const body = editing
-      ? { name, email, subjectIds: selectedSubjects, classIds: selectedClasses }
-      : { name, email, password, subjectIds: selectedSubjects, classIds: selectedClasses };
+      ? { name, email, subjectIds: selectedSubjects }
+      : { name, email, password, subjectIds: selectedSubjects };
 
     const url = editing ? `/api/admin/teachers/${editing.id}` : "/api/admin/teachers";
     const method = editing ? "PATCH" : "POST";
@@ -102,7 +104,7 @@ export default function TeachersPage() {
   };
 
   const resetForm = () => {
-    setName(""); setEmail(""); setPassword(""); setSelectedSubjects([]); setSelectedClasses([]); setEditing(null);
+    setName(""); setEmail(""); setPassword(""); setSelectedSubjects([]); setEditing(null);
   };
 
   const openEdit = (teacher: Teacher) => {
@@ -110,8 +112,15 @@ export default function TeachersPage() {
     setName(teacher.user.name);
     setEmail(teacher.user.email);
     setSelectedSubjects(teacher.subjects.map((s) => s.id));
-    setSelectedClasses(teacher.classes.map((c) => c.id));
     setOpen(true);
+  };
+
+  const getTeacherClasses = (teacher: Teacher): string[] => {
+    const classMap = new Map<string, string>();
+    teacher.subjects.forEach((s) => {
+      if (s.class) classMap.set(s.class.id, s.class.name);
+    });
+    return Array.from(classMap.values());
   };
 
   const columns: ColumnDef<Teacher, any>[] = [
@@ -127,30 +136,34 @@ export default function TeachersPage() {
     {
       accessorKey: "subjects",
       header: "Subjects",
-      cell: ({ row }) =>
-        row.original.subjects.length > 0 ? (
+      cell: ({ row }) => {
+        const subjects = row.original.subjects || [];
+        return subjects.length > 0 ? (
           <div className="flex flex-wrap gap-1">
-            {row.original.subjects.map((s: any) => (
+            {subjects.map((s: any) => (
               <Badge key={s.id} variant="outline">{s.name}</Badge>
             ))}
           </div>
         ) : (
           <span className="text-muted-foreground">—</span>
-        ),
+        );
+      },
     },
     {
-      accessorKey: "classes",
+      id: "classes",
       header: "Classes",
-      cell: ({ row }) =>
-        row.original.classes.length > 0 ? (
+      cell: ({ row }) => {
+        const classes = getTeacherClasses(row.original);
+        return classes.length > 0 ? (
           <div className="flex flex-wrap gap-1">
-            {row.original.classes.map((c: any) => (
-              <Badge key={c.id} variant="secondary">{c.name}</Badge>
+            {classes.map((name, i) => (
+              <Badge key={i} variant="secondary">{name}</Badge>
             ))}
           </div>
         ) : (
           <span className="text-muted-foreground">—</span>
-        ),
+        );
+      },
     },
     {
       id: "actions",
@@ -200,12 +213,12 @@ export default function TeachersPage() {
                 </div>
               )}
               <div className="space-y-2">
-                <Label>Subjects</Label>
+                <Label>Assign Subjects</Label>
                 <div className="flex flex-wrap gap-2">
-                  {subjects.length === 0 && (
+                  {allSubjects.length === 0 && (
                     <span className="text-sm text-muted-foreground">No subjects available</span>
                   )}
-                  {subjects.map((s) => (
+                  {allSubjects.map((s) => (
                     <Badge
                       key={s.id}
                       variant={selectedSubjects.includes(s.id) ? "default" : "outline"}
@@ -216,26 +229,7 @@ export default function TeachersPage() {
                         );
                       }}
                     >
-                      {s.name}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Classes</Label>
-                <div className="flex flex-wrap gap-2">
-                  {classes.map((c) => (
-                    <Badge
-                      key={c.id}
-                      variant={selectedClasses.includes(c.id) ? "default" : "outline"}
-                      className="cursor-pointer"
-                      onClick={() => {
-                        setSelectedClasses((prev) =>
-                          prev.includes(c.id) ? prev.filter((id) => id !== c.id) : [...prev, c.id]
-                        );
-                      }}
-                    >
-                      {c.name}
+                      {s.name} ({s.class.name})
                     </Badge>
                   ))}
                 </div>
