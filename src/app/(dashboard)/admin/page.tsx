@@ -39,10 +39,10 @@ export default function AdminDashboard() {
     : [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Admin Dashboard</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl font-semibold tracking-tight">Admin Dashboard</h1>
+        <p className="text-sm text-muted-foreground mt-1">
           Welcome back. Here&apos;s an overview of your school.
         </p>
       </div>
@@ -51,7 +51,7 @@ export default function AdminDashboard() {
         {loading ? (
           <>
             {[1, 2, 3, 4].map((i) => (
-              <Skeleton key={i} className="h-[100px] rounded-lg" />
+              <Skeleton key={i} className="h-[108px] rounded-lg" />
             ))}
           </>
         ) : (
@@ -81,9 +81,9 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Distribution Overview</CardTitle>
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-medium">Distribution Overview</CardTitle>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -105,26 +105,26 @@ export default function AdminDashboard() {
             )}
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Quick Actions</CardTitle>
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-medium">Quick Actions</CardTitle>
           </CardHeader>
-          <CardContent className="flex flex-col gap-3">
-            <Button render={<Link href="/admin/students" />} variant="outline" className="justify-start">
-                <Users className="mr-2 h-4 w-4" />
-                Manage Students
+          <CardContent className="flex flex-col gap-2">
+            <Button render={<Link href="/admin/students" />} variant="outline" className="justify-start h-9 transition-colors duration-150">
+              <Users className="mr-2 h-4 w-4 text-muted-foreground" />
+              Manage Students
             </Button>
-            <Button render={<Link href="/admin/teachers" />} variant="outline" className="justify-start">
-                <GraduationCap className="mr-2 h-4 w-4" />
-                Manage Teachers
+            <Button render={<Link href="/admin/teachers" />} variant="outline" className="justify-start h-9 transition-colors duration-150">
+              <GraduationCap className="mr-2 h-4 w-4 text-muted-foreground" />
+              Manage Teachers
             </Button>
-            <Button render={<Link href="/admin/classes" />} variant="outline" className="justify-start">
-                <BookOpen className="mr-2 h-4 w-4" />
-                Manage Classes
+            <Button render={<Link href="/admin/classes" />} variant="outline" className="justify-start h-9 transition-colors duration-150">
+              <BookOpen className="mr-2 h-4 w-4 text-muted-foreground" />
+              Manage Classes
             </Button>
-            <Button render={<Link href="/admin/announcements" />} variant="outline" className="justify-start">
-                <Bell className="mr-2 h-4 w-4" />
-                Post Announcement
+            <Button render={<Link href="/admin/announcements" />} variant="outline" className="justify-start h-9 transition-colors duration-150">
+              <Bell className="mr-2 h-4 w-4 text-muted-foreground" />
+              Post Announcement
             </Button>
           </CardContent>
         </Card>

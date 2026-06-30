@@ -37,19 +37,21 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center space-y-2">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-            <GraduationCap className="h-6 w-6 text-primary" />
+    <div className="flex min-h-screen items-center justify-center bg-muted/30 p-4">
+      <Card className="w-full max-w-sm shadow-sm">
+        <CardHeader className="space-y-1 text-center">
+          <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground mb-1">
+            <GraduationCap className="h-5 w-5" />
           </div>
-          <CardTitle className="text-2xl font-bold">SchoolHub</CardTitle>
-          <CardDescription>Sign in to your account</CardDescription>
+          <CardTitle className="text-xl font-semibold">SchoolHub</CardTitle>
+          <CardDescription className="text-sm text-muted-foreground">
+            Sign in to your account
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-sm font-medium">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -57,10 +59,11 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                className="h-9"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-sm font-medium">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -68,9 +71,10 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                className="h-9"
               />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button type="submit" className="w-full h-9 transition-colors duration-150" disabled={loading}>
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -81,11 +85,13 @@ export default function LoginPage() {
               )}
             </Button>
           </form>
-          <div className="mt-6 rounded-lg bg-muted p-3 text-xs text-muted-foreground">
-            <p className="font-medium mb-1">Demo Accounts:</p>
-            <p>admin@school.com / admin123</p>
-            <p>teacher@school.com / teacher123</p>
-            <p>student@school.com / student123</p>
+          <div className="mt-5 rounded-lg border bg-muted/50 p-3 text-xs text-muted-foreground">
+            <p className="font-medium text-foreground mb-1.5">Demo Accounts</p>
+            <div className="space-y-0.5">
+              <p>admin@school.com / admin123</p>
+              <p>teacher@school.com / teacher123</p>
+              <p>student@school.com / student123</p>
+            </div>
           </div>
         </CardContent>
       </Card>

@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { StatCard } from "@/components/ui/stat-card";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -11,7 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { ClipboardCheck } from "lucide-react";
+import { ClipboardCheck, Users, CheckCircle } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 
 interface Attendance {
@@ -46,64 +48,36 @@ export default function StudentAttendancePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">My Attendance</h1>
-        <p className="text-muted-foreground">Track your attendance record.</p>
+        <h1 className="text-2xl font-semibold tracking-tight">My Attendance</h1>
+        <p className="text-sm text-muted-foreground mt-1">Track your attendance record.</p>
       </div>
 
       {loading ? (
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 grid-cols-3">
           {[1, 2, 3].map((i) => (
-            <Card key={i}>
-              <CardHeader className="pb-2"><div className="h-4 w-24 animate-pulse rounded bg-muted" /></CardHeader>
-              <CardContent><div className="h-8 w-16 animate-pulse rounded bg-muted" /></CardContent>
-            </Card>
+            <Skeleton key={i} className="h-[108px] rounded-lg" />
           ))}
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card className="transition-shadow hover:shadow-md">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total Days</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{totalCount}</div>
-            </CardContent>
-          </Card>
-          <Card className="transition-shadow hover:shadow-md">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Present</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-green-600">{presentCount}</div>
-            </CardContent>
-          </Card>
-          <Card className="transition-shadow hover:shadow-md">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Attendance Rate</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{percentage}%</div>
-            </CardContent>
-          </Card>
+        <div className="grid gap-4 grid-cols-3">
+          <StatCard title="Total Days" value={totalCount} icon={<Users className="h-4 w-4" />} />
+          <StatCard title="Present" value={presentCount} icon={<CheckCircle className="h-4 w-4" />} />
+          <StatCard title="Attendance Rate" value={`${percentage}%`} icon={<ClipboardCheck className="h-4 w-4" />} />
         </div>
       )}
 
-      <Card>
+      <Card className="shadow-sm">
         <CardContent className="p-0">
           {loading ? (
             <div className="p-6 space-y-3">
               {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="flex justify-between">
-                  <div className="h-4 w-24 animate-pulse rounded bg-muted" />
-                  <div className="h-4 w-20 animate-pulse rounded bg-muted" />
-                  <div className="h-4 w-16 animate-pulse rounded bg-muted" />
-                </div>
+                <Skeleton key={i} className="h-9 w-full" />
               ))}
             </div>
           ) : (
             <Table>
               <TableHeader>
-                <TableRow>
+                <TableRow className="hover:bg-transparent">
                   <TableHead>Date</TableHead>
                   <TableHead>Subject</TableHead>
                   <TableHead className="text-right">Status</TableHead>
@@ -118,7 +92,7 @@ export default function StudentAttendancePage() {
                   </TableRow>
                 ) : (
                   attendance.map((a) => (
-                    <TableRow key={a.id}>
+                    <TableRow key={a.id} className="transition-colors duration-150 hover:bg-muted/40">
                       <TableCell>{formatDate(a.date)}</TableCell>
                       <TableCell>{a.subject.name}</TableCell>
                       <TableCell className="text-right">

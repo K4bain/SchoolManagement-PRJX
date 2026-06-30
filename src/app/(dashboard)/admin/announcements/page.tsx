@@ -5,7 +5,6 @@ import { StatCard } from "@/components/ui/stat-card";
 import { DataTable } from "@/components/ui/data-table";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
@@ -113,17 +112,17 @@ export default function AnnouncementsPage() {
       id: "actions",
       header: "Actions",
       cell: ({ row }) => (
-        <div className="flex gap-1">
-          <Button variant="ghost" size="icon" onClick={() => {
+        <div className="flex gap-0.5">
+          <Button variant="ghost" size="icon" className="h-8 w-8 transition-colors duration-150" onClick={() => {
             setEditing(row.original);
             setTitle(row.original.title);
             setBody(row.original.body);
             setOpen(true);
           }}>
-            <Pencil className="h-4 w-4" />
+            <Pencil className="h-3.5 w-3.5" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => handleDelete(row.original.id)}>
-            <Trash2 className="h-4 w-4 text-destructive" />
+          <Button variant="ghost" size="icon" className="h-8 w-8 transition-colors duration-150" onClick={() => handleDelete(row.original.id)}>
+            <Trash2 className="h-3.5 w-3.5 text-destructive" />
           </Button>
         </div>
       ),
@@ -134,8 +133,8 @@ export default function AnnouncementsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Announcements</h1>
-          <p className="text-muted-foreground">Post and manage school announcements.</p>
+          <h1 className="text-2xl font-semibold tracking-tight">Announcements</h1>
+          <p className="text-sm text-muted-foreground mt-1">Post and manage school announcements.</p>
         </div>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
           <DialogTrigger render={<Button />}>
@@ -148,16 +147,17 @@ export default function AnnouncementsPage() {
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label>Title</Label>
+                <Label className="text-sm font-medium">Title</Label>
                 <Input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Announcement title"
+                  className="h-9"
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label>Content</Label>
+                <Label className="text-sm font-medium">Content</Label>
                 <Textarea
                   value={body}
                   onChange={(e) => setBody(e.target.value)}
@@ -166,7 +166,7 @@ export default function AnnouncementsPage() {
                   rows={4}
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={submitting}>
+              <Button type="submit" className="w-full h-9 transition-colors duration-150" disabled={submitting}>
                 {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {editing ? "Update" : "Post"}
               </Button>
@@ -176,14 +176,14 @@ export default function AnnouncementsPage() {
       </div>
 
       {loading ? (
-        <Skeleton className="h-[100px] rounded-lg" />
+        <Skeleton className="h-[108px] rounded-lg" />
       ) : (
         <StatCard title="Total Announcements" value={announcements.length} icon={<Bell className="h-4 w-4" />} />
       )}
 
       {loading ? (
         <div className="space-y-3">
-          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-9 w-full" />
           <Skeleton className="h-[400px] w-full" />
         </div>
       ) : (

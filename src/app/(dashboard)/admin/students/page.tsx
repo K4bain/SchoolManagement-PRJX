@@ -134,12 +134,12 @@ export default function StudentsPage() {
       id: "actions",
       header: "Actions",
       cell: ({ row }) => (
-        <div className="flex gap-1">
-          <Button variant="ghost" size="icon" onClick={() => openEdit(row.original)}>
-            <Pencil className="h-4 w-4" />
+        <div className="flex gap-0.5">
+          <Button variant="ghost" size="icon" className="h-8 w-8 transition-colors duration-150" onClick={() => openEdit(row.original)}>
+            <Pencil className="h-3.5 w-3.5" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => handleDelete(row.original.id)}>
-            <Trash2 className="h-4 w-4 text-destructive" />
+          <Button variant="ghost" size="icon" className="h-8 w-8 transition-colors duration-150" onClick={() => handleDelete(row.original.id)}>
+            <Trash2 className="h-3.5 w-3.5 text-destructive" />
           </Button>
         </div>
       ),
@@ -150,8 +150,8 @@ export default function StudentsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Students</h1>
-          <p className="text-muted-foreground">Manage student accounts and enrollment.</p>
+          <h1 className="text-2xl font-semibold tracking-tight">Students</h1>
+          <p className="text-sm text-muted-foreground mt-1">Manage student accounts and enrollment.</p>
         </div>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
           <DialogTrigger render={<Button />}>
@@ -164,42 +164,45 @@ export default function StudentsPage() {
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label>Name</Label>
+                <Label className="text-sm font-medium">Name</Label>
                 <Input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Enter student name"
+                  className="h-9"
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label>Email</Label>
+                <Label className="text-sm font-medium">Email</Label>
                 <Input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="student@school.com"
+                  className="h-9"
                   required
                   disabled={!!editing}
                 />
               </div>
               {!editing && (
                 <div className="space-y-2">
-                  <Label>Password</Label>
+                  <Label className="text-sm font-medium">Password</Label>
                   <Input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Minimum 6 characters"
+                    className="h-9"
                     required
                     minLength={6}
                   />
                 </div>
               )}
               <div className="space-y-2">
-                <Label>Class</Label>
+                <Label className="text-sm font-medium">Class</Label>
                 <select
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+                  className="flex h-9 w-full rounded-lg border border-input bg-transparent px-3 py-1 text-sm transition-colors duration-150 focus:border-ring focus:ring-2 focus:ring-ring/20"
                   value={classId}
                   onChange={(e) => setClassId(e.target.value)}
                 >
@@ -209,7 +212,7 @@ export default function StudentsPage() {
                   ))}
                 </select>
               </div>
-              <Button type="submit" className="w-full" disabled={submitting}>
+              <Button type="submit" className="w-full h-9 transition-colors duration-150" disabled={submitting}>
                 {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {editing ? "Update" : "Create"}
               </Button>
@@ -219,11 +222,7 @@ export default function StudentsPage() {
       </div>
 
       {loading ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-[100px] rounded-lg" />
-          ))}
-        </div>
+        <Skeleton className="h-[108px] rounded-lg" />
       ) : (
         <StatCard
           title="Total Students"
@@ -234,7 +233,7 @@ export default function StudentsPage() {
 
       {loading ? (
         <div className="space-y-3">
-          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-9 w-full" />
           <Skeleton className="h-[400px] w-full" />
         </div>
       ) : (

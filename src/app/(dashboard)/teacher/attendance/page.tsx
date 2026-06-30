@@ -108,18 +108,18 @@ export default function AttendancePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Mark Attendance</h1>
-        <p className="text-muted-foreground">Select a class and mark student attendance for today.</p>
+        <h1 className="text-2xl font-semibold tracking-tight">Mark Attendance</h1>
+        <p className="text-sm text-muted-foreground mt-1">Select a class and mark student attendance for today.</p>
       </div>
 
       <div className="flex items-center gap-4">
         <div className="space-y-2">
-          <Label>Select Subject</Label>
+          <Label className="text-sm font-medium">Select Subject</Label>
           {loadingSubjects ? (
             <Skeleton className="h-9 w-[250px]" />
           ) : (
             <Select value={selectedSubject} onValueChange={(v) => setSelectedSubject(v ?? "")}>
-              <SelectTrigger className="w-[250px]">
+              <SelectTrigger className="w-[250px] h-9">
                 <SelectValue placeholder="Choose a subject" />
               </SelectTrigger>
               <SelectContent>
@@ -146,13 +146,13 @@ export default function AttendancePage() {
       )}
 
       {selectedSubject && !loadingStudents && students.length > 0 && (
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <ClipboardCheck className="h-5 w-5" />
+        <Card className="shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-base font-medium flex items-center gap-2">
+              <ClipboardCheck className="h-4 w-4 text-muted-foreground" />
               Students — {new Date().toLocaleDateString()}
             </CardTitle>
-            <Button onClick={handleSubmit} disabled={submitting}>
+            <Button onClick={handleSubmit} disabled={submitting} className="h-9 transition-colors duration-150">
               {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Save Attendance
             </Button>
@@ -160,7 +160,7 @@ export default function AttendancePage() {
           <CardContent className="p-0">
             <Table>
               <TableHeader>
-                <TableRow>
+                <TableRow className="hover:bg-transparent">
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Status</TableHead>
@@ -170,18 +170,18 @@ export default function AttendancePage() {
                 {students.map((student) => {
                   const current = attendance[student.id]?.status;
                   return (
-                    <TableRow key={student.id}>
+                    <TableRow key={student.id} className="transition-colors duration-150 hover:bg-muted/40">
                       <TableCell className="font-medium">{student.user.name}</TableCell>
                       <TableCell>{student.user.email}</TableCell>
                       <TableCell>
-                        <div className="flex gap-2">
+                        <div className="flex gap-1.5">
                           {(["PRESENT", "ABSENT", "LATE"] as const).map((status) => (
                             <Button
                               key={status}
                               variant={current === status ? "default" : "outline"}
                               size="sm"
+                              className="h-7 transition-colors duration-150"
                               onClick={() => setStatus(student.id, status)}
-                              className={current === status ? statusColors[status] : ""}
                             >
                               {status}
                             </Button>
@@ -198,11 +198,13 @@ export default function AttendancePage() {
       )}
 
       {selectedSubject && !loadingStudents && students.length === 0 && (
-        <Card>
+        <Card className="shadow-sm">
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <Users className="h-12 w-12 text-muted-foreground/50 mb-4" />
-            <p className="text-lg font-medium">No students enrolled</p>
-            <p className="text-sm text-muted-foreground">No students are enrolled in this subject yet.</p>
+            <div className="rounded-lg bg-muted/80 p-3 mb-3">
+              <Users className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <p className="text-base font-medium">No students enrolled</p>
+            <p className="text-sm text-muted-foreground mt-1">No students are enrolled in this subject yet.</p>
           </CardContent>
         </Card>
       )}

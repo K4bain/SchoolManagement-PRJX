@@ -25,22 +25,30 @@ export default function TeacherAnnouncementsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Announcements</h1>
-        <p className="text-muted-foreground">Latest school announcements.</p>
+        <h1 className="text-2xl font-semibold tracking-tight">Announcements</h1>
+        <p className="text-sm text-muted-foreground mt-1">Latest school announcements.</p>
       </div>
-      <div className="space-y-4">
+      <div className="space-y-3">
         {announcements.length === 0 ? (
-          <Card>
-            <CardContent className="py-8 text-center text-muted-foreground">No announcements.</CardContent>
+          <Card className="shadow-sm">
+            <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="rounded-lg bg-muted/80 p-3 mb-3">
+                <Bell className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <p className="text-base font-medium">No announcements</p>
+              <p className="text-sm text-muted-foreground mt-1">Check back later for updates.</p>
+            </CardContent>
           </Card>
         ) : (
           announcements.map((a) => (
-            <Card key={a.id}>
-              <CardHeader className="flex flex-row items-start gap-3">
-                <Bell className="h-5 w-5 text-primary mt-0.5" />
+            <Card key={a.id} className="shadow-sm transition-colors duration-150 hover:bg-accent/50">
+              <CardHeader className="flex flex-row items-start gap-3 pb-2">
+                <div className="rounded-lg bg-muted/80 p-2 mt-0.5">
+                  <Bell className="h-4 w-4 text-muted-foreground" />
+                </div>
                 <div>
-                  <CardTitle className="text-lg">{a.title}</CardTitle>
-                  <p className="text-xs text-muted-foreground mt-1">{formatDate(a.createdAt)}</p>
+                  <CardTitle className="text-base font-medium">{a.title}</CardTitle>
+                  <p className="text-xs text-muted-foreground mt-0.5">{formatDate(a.createdAt)}</p>
                 </div>
               </CardHeader>
               <CardContent>

@@ -169,12 +169,12 @@ export default function TeachersPage() {
       id: "actions",
       header: "Actions",
       cell: ({ row }) => (
-        <div className="flex gap-1">
-          <Button variant="ghost" size="icon" onClick={() => openEdit(row.original)}>
-            <Pencil className="h-4 w-4" />
+        <div className="flex gap-0.5">
+          <Button variant="ghost" size="icon" className="h-8 w-8 transition-colors duration-150" onClick={() => openEdit(row.original)}>
+            <Pencil className="h-3.5 w-3.5" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => handleDelete(row.original.id)}>
-            <Trash2 className="h-4 w-4 text-destructive" />
+          <Button variant="ghost" size="icon" className="h-8 w-8 transition-colors duration-150" onClick={() => handleDelete(row.original.id)}>
+            <Trash2 className="h-3.5 w-3.5 text-destructive" />
           </Button>
         </div>
       ),
@@ -185,8 +185,8 @@ export default function TeachersPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Teachers</h1>
-          <p className="text-muted-foreground">Manage teacher accounts and assignments.</p>
+          <h1 className="text-2xl font-semibold tracking-tight">Teachers</h1>
+          <p className="text-sm text-muted-foreground mt-1">Manage teacher accounts and assignments.</p>
         </div>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
           <DialogTrigger render={<Button />}>
@@ -199,21 +199,43 @@ export default function TeachersPage() {
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label>Name</Label>
-                <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter teacher name" required />
+                <Label className="text-sm font-medium">Name</Label>
+                <Input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Enter teacher name"
+                  className="h-9"
+                  required
+                />
               </div>
               <div className="space-y-2">
-                <Label>Email</Label>
-                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="teacher@school.com" required disabled={!!editing} />
+                <Label className="text-sm font-medium">Email</Label>
+                <Input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="teacher@school.com"
+                  className="h-9"
+                  required
+                  disabled={!!editing}
+                />
               </div>
               {!editing && (
                 <div className="space-y-2">
-                  <Label>Password</Label>
-                  <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Minimum 6 characters" required minLength={6} />
+                  <Label className="text-sm font-medium">Password</Label>
+                  <Input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Minimum 6 characters"
+                    className="h-9"
+                    required
+                    minLength={6}
+                  />
                 </div>
               )}
               <div className="space-y-2">
-                <Label>Assign Subjects</Label>
+                <Label className="text-sm font-medium">Assign Subjects</Label>
                 <div className="flex flex-wrap gap-2">
                   {allSubjects.length === 0 && (
                     <span className="text-sm text-muted-foreground">No subjects available</span>
@@ -222,7 +244,7 @@ export default function TeachersPage() {
                     <Badge
                       key={s.id}
                       variant={selectedSubjects.includes(s.id) ? "default" : "outline"}
-                      className="cursor-pointer"
+                      className="cursor-pointer transition-colors duration-150"
                       onClick={() => {
                         setSelectedSubjects((prev) =>
                           prev.includes(s.id) ? prev.filter((id) => id !== s.id) : [...prev, s.id]
@@ -234,7 +256,7 @@ export default function TeachersPage() {
                   ))}
                 </div>
               </div>
-              <Button type="submit" className="w-full" disabled={submitting}>
+              <Button type="submit" className="w-full h-9 transition-colors duration-150" disabled={submitting}>
                 {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {editing ? "Update" : "Create"}
               </Button>
@@ -244,11 +266,7 @@ export default function TeachersPage() {
       </div>
 
       {loading ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-[100px] rounded-lg" />
-          ))}
-        </div>
+        <Skeleton className="h-[108px] rounded-lg" />
       ) : (
         <StatCard
           title="Total Teachers"
@@ -259,7 +277,7 @@ export default function TeachersPage() {
 
       {loading ? (
         <div className="space-y-3">
-          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-9 w-full" />
           <Skeleton className="h-[400px] w-full" />
         </div>
       ) : (

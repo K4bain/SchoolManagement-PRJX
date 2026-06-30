@@ -34,16 +34,18 @@ export default function StudentTimetablePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Timetable</h1>
-        <p className="text-muted-foreground">Your weekly class schedule.</p>
+        <h1 className="text-2xl font-semibold tracking-tight">Timetable</h1>
+        <p className="text-sm text-muted-foreground mt-1">Your weekly class schedule.</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {DAYS.map((day) => (
-          <Card key={day}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Calendar className="h-5 w-5 text-primary" />
+          <Card key={day} className="shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-base font-medium">
+                <div className="rounded-lg bg-muted/80 p-1.5">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                </div>
                 {day.charAt(0) + day.slice(1).toLowerCase()}
               </CardTitle>
             </CardHeader>
@@ -55,7 +57,7 @@ export default function StudentTimetablePage() {
                   {grouped[day].map((entry) => (
                     <div
                       key={entry.id}
-                      className="flex items-center justify-between rounded-lg border p-3"
+                      className="flex items-center justify-between rounded-lg border p-3 transition-colors duration-150 hover:bg-accent/50"
                     >
                       <div>
                         <p className="text-sm font-medium">{entry.subject.name}</p>

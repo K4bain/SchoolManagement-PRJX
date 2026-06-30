@@ -88,8 +88,8 @@ export default function ClassesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Classes</h1>
-          <p className="text-muted-foreground">Manage classes and student enrollment.</p>
+          <h1 className="text-2xl font-semibold tracking-tight">Classes</h1>
+          <p className="text-sm text-muted-foreground mt-1">Manage classes and student enrollment.</p>
         </div>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { setName(""); setEditing(null); } }}>
           <DialogTrigger render={<Button />}>
@@ -102,15 +102,16 @@ export default function ClassesPage() {
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label>Class Name</Label>
+                <Label className="text-sm font-medium">Class Name</Label>
                 <Input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Grade 10-A"
+                  className="h-9"
                   required
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={submitting}>
+              <Button type="submit" className="w-full h-9 transition-colors duration-150" disabled={submitting}>
                 {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {editing ? "Update" : "Create"}
               </Button>
@@ -120,13 +121,13 @@ export default function ClassesPage() {
       </div>
 
       {loading ? (
-        <div className="grid gap-4 md:grid-cols-3">
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-[100px] rounded-lg" />
+        <div className="grid gap-4 md:grid-cols-2">
+          {[1, 2].map((i) => (
+            <Skeleton key={i} className="h-[108px] rounded-lg" />
           ))}
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2">
           <StatCard title="Total Classes" value={classes.length} icon={<BookOpen className="h-4 w-4" />} />
           <StatCard
             title="Total Students"
@@ -143,30 +144,38 @@ export default function ClassesPage() {
           ))}
         </div>
       ) : classes.length === 0 ? (
-        <Card>
+        <Card className="shadow-sm">
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <BookOpen className="h-12 w-12 text-muted-foreground/50 mb-4" />
-            <p className="text-lg font-medium">No classes yet</p>
-            <p className="text-sm text-muted-foreground">Create your first class to get started.</p>
+            <div className="rounded-lg bg-muted/80 p-3 mb-3">
+              <BookOpen className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <p className="text-base font-medium">No classes yet</p>
+            <p className="text-sm text-muted-foreground mt-1">Create your first class to get started.</p>
           </CardContent>
         </Card>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {classes.map((cls) => (
-            <Card key={cls.id} className="transition-colors hover:bg-muted/50">
+            <Card key={cls.id} className="shadow-sm transition-colors duration-150 hover:bg-accent/50">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg">{cls.name}</CardTitle>
-                  <div className="flex gap-1">
+                  <CardTitle className="text-base font-medium">{cls.name}</CardTitle>
+                  <div className="flex gap-0.5">
                     <Button
                       variant="ghost"
                       size="icon"
+                      className="h-8 w-8 transition-colors duration-150"
                       onClick={() => { setEditing(cls); setName(cls.name); setOpen(true); }}
                     >
-                      <Pencil className="h-4 w-4" />
+                      <Pencil className="h-3.5 w-3.5" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(cls.id)}>
-                      <Trash2 className="h-4 w-4 text-destructive" />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 transition-colors duration-150"
+                      onClick={() => handleDelete(cls.id)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5 text-destructive" />
                     </Button>
                   </div>
                 </div>

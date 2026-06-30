@@ -63,7 +63,7 @@ export function SiteHeader() {
       <Button
         variant="ghost"
         size="sm"
-        className="gap-2 text-muted-foreground"
+        className="gap-2 text-muted-foreground transition-colors duration-150"
         onClick={() => {
           document.dispatchEvent(
             new KeyboardEvent("keydown", { key: "k", metaKey: true })
