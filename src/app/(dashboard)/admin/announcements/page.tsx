@@ -6,6 +6,7 @@ import { DataTable } from "@/components/ui/data-table";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
   DialogContent,
@@ -23,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Pencil, Trash2, Bell } from "lucide-react";
+import { Plus, Pencil, Trash2, Bell, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface Announcement {
@@ -36,6 +37,8 @@ interface Announcement {
 
 export default function AnnouncementsPage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Announcement | null>(null);
   const [title, setTitle] = useState("");
@@ -43,34 +46,44 @@ export default function AnnouncementsPage() {
   const [targetRole, setTargetRole] = useState("ALL");
 
   const fetchData = () => {
+    setLoading(true);
     fetch("/api/admin/announcements")
       .then((res) => res.json())
       .then(setAnnouncements)
-      .catch(console.error);
+      .catch(console.error)
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => { fetchData(); }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitting(true);
     const body = { title, content, targetRole };
     const method = editing ? "PATCH" : "POST";
     const url = editing ? `/api/admin/announcements/${editing.id}` : "/api/admin/announcements";
 
-    const res = await fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
 
-    if (res.ok) {
-      toast.success(editing ? "Announcement updated" : "Announcement posted");
-      fetchData();
-    } else {
-      toast.error(editing ? "Failed to update" : "Failed to post");
+      if (res.ok) {
+        toast.success(editing ? "Announcement updated" : "Announcement posted");
+        fetchData();
+      } else {
+        const data = await res.json().catch(() => null);
+        toast.error(data?.error || (editing ? "Failed to update" : "Failed to post"));
+      }
+      setOpen(false);
+      resetForm();
+    } catch {
+      toast.error("Network error. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
-    setOpen(false);
-    resetForm();
   };
 
   const handleDelete = async (id: string) => {
@@ -156,11 +169,22 @@ export default function AnnouncementsPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label>Title</Label>
-                <Input value={title} onChange={(e) => setTitle(e.target.value)} required />
+                <Input
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Announcement title"
+                  required
+                />
               </div>
               <div className="space-y-2">
                 <Label>Content</Label>
-                <Textarea value={content} onChange={(e) => setContent(e.target.value)} required rows={4} />
+                <Textarea
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  placeholder="Write your announcement here..."
+                  required
+                  rows={4}
+                />
               </div>
               <div className="space-y-2">
                 <Label>Target Audience</Label>
@@ -175,20 +199,34 @@ export default function AnnouncementsPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <Button type="submit" className="w-full">{editing ? "Update" : "Post"}</Button>
+              <Button type="submit" className="w-full" disabled={submitting}>
+                {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {editing ? "Update" : "Post"}
+              </Button>
             </form>
           </DialogContent>
         </Dialog>
       </div>
 
-      <StatCard title="Total Announcements" value={announcements.length} icon={<Bell className="h-4 w-4" />} />
+      {loading ? (
+        <Skeleton className="h-[100px] rounded-lg" />
+      ) : (
+        <StatCard title="Total Announcements" value={announcements.length} icon={<Bell className="h-4 w-4" />} />
+      )}
 
-      <DataTable
-        columns={columns}
-        data={announcements}
-        searchKey="title"
-        searchPlaceholder="Search announcements..."
-      />
+      {loading ? (
+        <div className="space-y-3">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-[400px] w-full" />
+        </div>
+      ) : (
+        <DataTable
+          columns={columns}
+          data={announcements}
+          searchKey="title"
+          searchPlaceholder="Search announcements..."
+        />
+      )}
     </div>
   );
 }

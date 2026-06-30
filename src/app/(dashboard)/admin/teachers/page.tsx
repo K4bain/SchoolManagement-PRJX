@@ -6,6 +6,7 @@ import { StatCard } from "@/components/ui/stat-card";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
   DialogContent,
@@ -15,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Plus, Pencil, Trash2, GraduationCap } from "lucide-react";
+import { Plus, Pencil, Trash2, GraduationCap, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface Teacher {
@@ -28,6 +29,8 @@ interface Teacher {
 
 export default function TeachersPage() {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Teacher | null>(null);
   const [name, setName] = useState("");
@@ -39,20 +42,24 @@ export default function TeachersPage() {
   const [selectedClasses, setSelectedClasses] = useState<string[]>([]);
 
   const fetchData = () => {
-    fetch("/api/admin/teachers")
-      .then((res) => res.json())
-      .then(setTeachers)
-      .catch(console.error);
-    fetch("/api/admin/classes")
-      .then((res) => res.json())
-      .then((data) => setClasses(data.map((c: any) => ({ id: c.id, name: c.name }))))
-      .catch(console.error);
+    setLoading(true);
+    Promise.all([
+      fetch("/api/admin/teachers").then((r) => r.json()),
+      fetch("/api/admin/classes").then((r) => r.json()),
+    ])
+      .then(([teachersData, classesData]) => {
+        setTeachers(teachersData);
+        setClasses(classesData.map((c: any) => ({ id: c.id, name: c.name })));
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => { fetchData(); }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitting(true);
     const body = editing
       ? { name, email, subjectIds: selectedSubjects, classIds: selectedClasses }
       : { name, email, password, subjectIds: selectedSubjects, classIds: selectedClasses };
@@ -60,20 +67,27 @@ export default function TeachersPage() {
     const url = editing ? `/api/admin/teachers/${editing.id}` : "/api/admin/teachers";
     const method = editing ? "PATCH" : "POST";
 
-    const res = await fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
 
-    if (res.ok) {
-      toast.success(editing ? "Teacher updated" : "Teacher created");
-      fetchData();
-    } else {
-      toast.error(editing ? "Failed to update teacher" : "Failed to create teacher");
+      if (res.ok) {
+        toast.success(editing ? "Teacher updated" : "Teacher created");
+        fetchData();
+      } else {
+        const data = await res.json().catch(() => null);
+        toast.error(data?.error || (editing ? "Failed to update teacher" : "Failed to create teacher"));
+      }
+      setOpen(false);
+      resetForm();
+    } catch {
+      toast.error("Network error. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
-    setOpen(false);
-    resetForm();
   };
 
   const handleDelete = async (id: string) => {
@@ -173,21 +187,24 @@ export default function TeachersPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label>Name</Label>
-                <Input value={name} onChange={(e) => setName(e.target.value)} required />
+                <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter teacher name" required />
               </div>
               <div className="space-y-2">
                 <Label>Email</Label>
-                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required={!!editing} disabled={!!editing} />
+                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="teacher@school.com" required disabled={!!editing} />
               </div>
               {!editing && (
                 <div className="space-y-2">
                   <Label>Password</Label>
-                  <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                  <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Minimum 6 characters" required minLength={6} />
                 </div>
               )}
               <div className="space-y-2">
                 <Label>Subjects</Label>
                 <div className="flex flex-wrap gap-2">
+                  {subjects.length === 0 && (
+                    <span className="text-sm text-muted-foreground">No subjects available</span>
+                  )}
                   {subjects.map((s) => (
                     <Badge
                       key={s.id}
@@ -223,24 +240,42 @@ export default function TeachersPage() {
                   ))}
                 </div>
               </div>
-              <Button type="submit" className="w-full">{editing ? "Update" : "Create"}</Button>
+              <Button type="submit" className="w-full" disabled={submitting}>
+                {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {editing ? "Update" : "Create"}
+              </Button>
             </form>
           </DialogContent>
         </Dialog>
       </div>
 
-      <StatCard
-        title="Total Teachers"
-        value={teachers.length}
-        icon={<GraduationCap className="h-4 w-4" />}
-      />
+      {loading ? (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-[100px] rounded-lg" />
+          ))}
+        </div>
+      ) : (
+        <StatCard
+          title="Total Teachers"
+          value={teachers.length}
+          icon={<GraduationCap className="h-4 w-4" />}
+        />
+      )}
 
-      <DataTable
-        columns={columns}
-        data={teachers}
-        searchKey="user.name"
-        searchPlaceholder="Search by name..."
-      />
+      {loading ? (
+        <div className="space-y-3">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-[400px] w-full" />
+        </div>
+      ) : (
+        <DataTable
+          columns={columns}
+          data={teachers}
+          searchKey="user.name"
+          searchPlaceholder="Search by name..."
+        />
+      )}
     </div>
   );
 }

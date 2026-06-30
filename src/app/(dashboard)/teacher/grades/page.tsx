@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -21,7 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "sonner";
-import { BarChart3, Save } from "lucide-react";
+import { BarChart3, Save, Loader2, Users } from "lucide-react";
 
 interface Subject {
   id: string;
@@ -42,24 +43,30 @@ interface GradeEntry {
 
 export default function GradesPage() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [loadingSubjects, setLoadingSubjects] = useState(true);
   const [selectedSubject, setSelectedSubject] = useState("");
   const [students, setStudents] = useState<Student[]>([]);
+  const [loadingStudents, setLoadingStudents] = useState(false);
   const [grades, setGrades] = useState<Record<string, GradeEntry>>({});
   const [label, setLabel] = useState("Assignment");
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     fetch("/api/teacher/subjects")
       .then((res) => res.json())
       .then(setSubjects)
-      .catch(console.error);
+      .catch(console.error)
+      .finally(() => setLoadingSubjects(false));
   }, []);
 
   useEffect(() => {
     if (!selectedSubject) return;
+    setLoadingStudents(true);
     fetch(`/api/teacher/grades?subjectId=${selectedSubject}`)
       .then((res) => res.json())
       .then((data) => setStudents(data.students || []))
-      .catch(console.error);
+      .catch(console.error)
+      .finally(() => setLoadingStudents(false));
   }, [selectedSubject]);
 
   const setScore = (studentId: string, score: string) => {
@@ -72,16 +79,23 @@ export default function GradesPage() {
       toast.error("No grades to submit");
       return;
     }
-    const res = await fetch("/api/teacher/grades", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        subjectId: selectedSubject,
-        records: records.map((g) => ({ ...g, score: parseFloat(g.score) })),
-      }),
-    });
-    if (res.ok) { toast.success("Grades saved"); setGrades({}); }
-    else toast.error("Failed to save grades");
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/teacher/grades", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          subjectId: selectedSubject,
+          records: records.map((g) => ({ ...g, score: parseFloat(g.score) })),
+        }),
+      });
+      if (res.ok) { toast.success("Grades saved"); setGrades({}); }
+      else toast.error("Failed to save grades");
+    } catch {
+      toast.error("Network error. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -94,18 +108,26 @@ export default function GradesPage() {
       <div className="flex items-end gap-4">
         <div className="space-y-2">
           <Label>Subject</Label>
-          <Select value={selectedSubject} onValueChange={(v) => setSelectedSubject(v ?? "")}>
-            <SelectTrigger className="w-[250px]">
-              <SelectValue placeholder="Choose a subject" />
-            </SelectTrigger>
-            <SelectContent>
-              {subjects.map((s) => (
-                <SelectItem key={s.id} value={s.id}>
-                  {s.name} — {s.class.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {loadingSubjects ? (
+            <Skeleton className="h-9 w-[250px]" />
+          ) : (
+            <Select value={selectedSubject} onValueChange={(v) => setSelectedSubject(v ?? "")}>
+              <SelectTrigger className="w-[250px]">
+                <SelectValue placeholder="Choose a subject" />
+              </SelectTrigger>
+              <SelectContent>
+                {subjects.length === 0 ? (
+                  <SelectItem value="__none" disabled>No subjects assigned</SelectItem>
+                ) : (
+                  subjects.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.name} — {s.class.name}
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
+          )}
         </div>
         <div className="space-y-2">
           <Label>Grade Label</Label>
@@ -118,14 +140,22 @@ export default function GradesPage() {
         </div>
       </div>
 
-      {selectedSubject && students.length > 0 && (
+      {selectedSubject && loadingStudents && (
+        <div className="space-y-3">
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-[300px] w-full" />
+        </div>
+      )}
+
+      {selectedSubject && !loadingStudents && students.length > 0 && (
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <BarChart3 className="h-5 w-5" />
               Enter Grades
             </CardTitle>
-            <Button onClick={handleSubmit}>
+            <Button onClick={handleSubmit} disabled={submitting}>
+              {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               <Save className="mr-2 h-4 w-4" />
               Save Grades
             </Button>
@@ -156,6 +186,16 @@ export default function GradesPage() {
                 ))}
               </TableBody>
             </Table>
+          </CardContent>
+        </Card>
+      )}
+
+      {selectedSubject && !loadingStudents && students.length === 0 && (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+            <Users className="h-12 w-12 text-muted-foreground/50 mb-4" />
+            <p className="text-lg font-medium">No students enrolled</p>
+            <p className="text-sm text-muted-foreground">No students are enrolled in this subject yet.</p>
           </CardContent>
         </Card>
       )}

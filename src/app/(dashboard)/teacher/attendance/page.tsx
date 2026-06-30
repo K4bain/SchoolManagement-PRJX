@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -19,9 +20,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { ClipboardCheck } from "lucide-react";
+import { ClipboardCheck, Loader2, Users } from "lucide-react";
 
 interface Subject {
   id: string;
@@ -41,19 +41,24 @@ interface AttendanceRecord {
 
 export default function AttendancePage() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [loadingSubjects, setLoadingSubjects] = useState(true);
   const [selectedSubject, setSelectedSubject] = useState("");
   const [students, setStudents] = useState<Student[]>([]);
+  const [loadingStudents, setLoadingStudents] = useState(false);
   const [attendance, setAttendance] = useState<Record<string, AttendanceRecord>>({});
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     fetch("/api/teacher/subjects")
       .then((res) => res.json())
       .then(setSubjects)
-      .catch(console.error);
+      .catch(console.error)
+      .finally(() => setLoadingSubjects(false));
   }, []);
 
   useEffect(() => {
     if (!selectedSubject) return;
+    setLoadingStudents(true);
     fetch(`/api/teacher/attendance?subjectId=${selectedSubject}`)
       .then((res) => res.json())
       .then((data) => {
@@ -64,7 +69,8 @@ export default function AttendancePage() {
         });
         setAttendance(existing);
       })
-      .catch(console.error);
+      .catch(console.error)
+      .finally(() => setLoadingStudents(false));
   }, [selectedSubject]);
 
   const setStatus = (studentId: string, status: "PRESENT" | "ABSENT" | "LATE") => {
@@ -77,13 +83,20 @@ export default function AttendancePage() {
       toast.error("No attendance to submit");
       return;
     }
-    const res = await fetch("/api/teacher/attendance", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ subjectId: selectedSubject, records }),
-    });
-    if (res.ok) toast.success("Attendance saved");
-    else toast.error("Failed to save attendance");
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/teacher/attendance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subjectId: selectedSubject, records }),
+      });
+      if (res.ok) toast.success("Attendance saved");
+      else toast.error("Failed to save attendance");
+    } catch {
+      toast.error("Network error. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const statusColors: Record<string, string> = {
@@ -102,29 +115,47 @@ export default function AttendancePage() {
       <div className="flex items-center gap-4">
         <div className="space-y-2">
           <Label>Select Subject</Label>
-          <Select value={selectedSubject} onValueChange={(v) => setSelectedSubject(v ?? "")}>
-            <SelectTrigger className="w-[250px]">
-              <SelectValue placeholder="Choose a subject" />
-            </SelectTrigger>
-            <SelectContent>
-              {subjects.map((s) => (
-                <SelectItem key={s.id} value={s.id}>
-                  {s.name} — {s.class.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {loadingSubjects ? (
+            <Skeleton className="h-9 w-[250px]" />
+          ) : (
+            <Select value={selectedSubject} onValueChange={(v) => setSelectedSubject(v ?? "")}>
+              <SelectTrigger className="w-[250px]">
+                <SelectValue placeholder="Choose a subject" />
+              </SelectTrigger>
+              <SelectContent>
+                {subjects.length === 0 ? (
+                  <SelectItem value="__none" disabled>No subjects assigned</SelectItem>
+                ) : (
+                  subjects.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.name} — {s.class.name}
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
+          )}
         </div>
       </div>
 
-      {selectedSubject && students.length > 0 && (
+      {selectedSubject && loadingStudents && (
+        <div className="space-y-3">
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-[300px] w-full" />
+        </div>
+      )}
+
+      {selectedSubject && !loadingStudents && students.length > 0 && (
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <ClipboardCheck className="h-5 w-5" />
               Students — {new Date().toLocaleDateString()}
             </CardTitle>
-            <Button onClick={handleSubmit}>Save Attendance</Button>
+            <Button onClick={handleSubmit} disabled={submitting}>
+              {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Save Attendance
+            </Button>
           </CardHeader>
           <CardContent className="p-0">
             <Table>
@@ -166,10 +197,12 @@ export default function AttendancePage() {
         </Card>
       )}
 
-      {selectedSubject && students.length === 0 && (
+      {selectedSubject && !loadingStudents && students.length === 0 && (
         <Card>
-          <CardContent className="py-8 text-center text-muted-foreground">
-            No students enrolled in this subject.
+          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+            <Users className="h-12 w-12 text-muted-foreground/50 mb-4" />
+            <p className="text-lg font-medium">No students enrolled</p>
+            <p className="text-sm text-muted-foreground">No students are enrolled in this subject yet.</p>
           </CardContent>
         </Card>
       )}
