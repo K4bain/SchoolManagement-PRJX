@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { StatCard } from "@/components/ui/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BentoCard, BentoGrid } from "@/components/magic-bento/MagicBentoCard";
+import { Button } from "@/components/ui/button";
 import { Users, GraduationCap, BookOpen, Bell } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import { Skeleton } from "@/components/ui/skeleton";
+import Link from "next/link";
 
 interface Stats {
   totalStudents: number;
@@ -13,7 +16,7 @@ interface Stats {
   totalAnnouncements: number;
 }
 
-const COLORS = ["#8b5cf6", "#3b82f6", "#10b981", "#f59e0b"];
+const COLORS = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)", "var(--chart-4)"];
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
@@ -35,10 +38,6 @@ export default function AdminDashboard() {
       ]
     : [];
 
-  const total = stats
-    ? stats.totalStudents + stats.totalTeachers + stats.totalClasses
-    : 0;
-
   return (
     <div className="space-y-6">
       <div>
@@ -48,62 +47,39 @@ export default function AdminDashboard() {
         </p>
       </div>
 
-      {/* Magic Bento Analytics Grid */}
-      {loading ? (
-        <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-          {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className="h-40 animate-pulse rounded-2xl bg-muted border border-border"
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+        {loading ? (
+          <>
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} className="h-[100px] rounded-lg" />
+            ))}
+          </>
+        ) : (
+          <>
+            <StatCard
+              title="Total Students"
+              value={stats?.totalStudents ?? 0}
+              icon={<Users className="h-4 w-4" />}
             />
-          ))}
-        </div>
-      ) : (
-        <BentoGrid>
-          <BentoCard
-            label="Total Students"
-            value={stats?.totalStudents ?? 0}
-            description="Enrolled across all classes"
-            icon={<Users className="h-5 w-5" />}
-            iconBg="bg-blue-500/10 dark:bg-blue-400/10"
-            iconColor="text-blue-600 dark:text-blue-400"
-            particleColor="hsl(217, 91%, 60%)"
-            progress={total > 0 ? Math.round(((stats?.totalStudents ?? 0) / total) * 100) : 0}
-            progressColor="hsl(217, 91%, 60%)"
-          />
-          <BentoCard
-            label="Total Teachers"
-            value={stats?.totalTeachers ?? 0}
-            description="Active teaching staff"
-            icon={<GraduationCap className="h-5 w-5" />}
-            iconBg="bg-emerald-500/10 dark:bg-emerald-400/10"
-            iconColor="text-emerald-600 dark:text-emerald-400"
-            particleColor="hsl(160, 84%, 39%)"
-            progress={total > 0 ? Math.round(((stats?.totalTeachers ?? 0) / total) * 100) : 0}
-            progressColor="hsl(160, 84%, 39%)"
-          />
-          <BentoCard
-            label="Classes"
-            value={stats?.totalClasses ?? 0}
-            description="Active classes"
-            icon={<BookOpen className="h-5 w-5" />}
-            iconBg="bg-purple-500/10 dark:bg-purple-400/10"
-            iconColor="text-purple-600 dark:text-purple-400"
-            particleColor="hsl(262, 83%, 58%)"
-          />
-          <BentoCard
-            label="Announcements"
-            value={stats?.totalAnnouncements ?? 0}
-            description="School-wide updates"
-            icon={<Bell className="h-5 w-5" />}
-            iconBg="bg-orange-500/10 dark:bg-orange-400/10"
-            iconColor="text-orange-600 dark:text-orange-400"
-            particleColor="hsl(32, 95%, 44%)"
-          />
-        </BentoGrid>
-      )}
+            <StatCard
+              title="Total Teachers"
+              value={stats?.totalTeachers ?? 0}
+              icon={<GraduationCap className="h-4 w-4" />}
+            />
+            <StatCard
+              title="Classes"
+              value={stats?.totalClasses ?? 0}
+              icon={<BookOpen className="h-4 w-4" />}
+            />
+            <StatCard
+              title="Announcements"
+              value={stats?.totalAnnouncements ?? 0}
+              icon={<Bell className="h-4 w-4" />}
+            />
+          </>
+        )}
+      </div>
 
-      {/* Charts + Actions row */}
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
@@ -111,7 +87,7 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             {loading ? (
-              <div className="h-[250px] animate-pulse rounded bg-muted" />
+              <Skeleton className="h-[250px] w-full" />
             ) : (
               <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={pieData}>
@@ -134,30 +110,22 @@ export default function AdminDashboard() {
             <CardTitle className="text-lg">Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
-            <a
-              href="/admin/students"
-              className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-            >
-              Manage Students
-            </a>
-            <a
-              href="/admin/teachers"
-              className="inline-flex items-center justify-center rounded-lg border border-input bg-background px-4 py-3 text-sm font-medium hover:bg-accent transition-colors"
-            >
-              Manage Teachers
-            </a>
-            <a
-              href="/admin/classes"
-              className="inline-flex items-center justify-center rounded-lg border border-input bg-background px-4 py-3 text-sm font-medium hover:bg-accent transition-colors"
-            >
-              Manage Classes
-            </a>
-            <a
-              href="/admin/announcements"
-              className="inline-flex items-center justify-center rounded-lg border border-input bg-background px-4 py-3 text-sm font-medium hover:bg-accent transition-colors"
-            >
-              Post Announcement
-            </a>
+            <Button render={<Link href="/admin/students" />} variant="outline" className="justify-start">
+                <Users className="mr-2 h-4 w-4" />
+                Manage Students
+            </Button>
+            <Button render={<Link href="/admin/teachers" />} variant="outline" className="justify-start">
+                <GraduationCap className="mr-2 h-4 w-4" />
+                Manage Teachers
+            </Button>
+            <Button render={<Link href="/admin/classes" />} variant="outline" className="justify-start">
+                <BookOpen className="mr-2 h-4 w-4" />
+                Manage Classes
+            </Button>
+            <Button render={<Link href="/admin/announcements" />} variant="outline" className="justify-start">
+                <Bell className="mr-2 h-4 w-4" />
+                Post Announcement
+            </Button>
           </CardContent>
         </Card>
       </div>

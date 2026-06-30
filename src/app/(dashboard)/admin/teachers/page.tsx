@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { type ColumnDef } from "@tanstack/react-table";
+import { StatCard } from "@/components/ui/stat-card";
+import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -12,86 +14,145 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Plus, Search, Pencil, Trash2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Plus, Pencil, Trash2, GraduationCap } from "lucide-react";
 import { toast } from "sonner";
 
 interface Teacher {
   id: string;
   userId: string;
   user: { id: string; name: string; email: string };
-  subjects: { name: string }[];
+  subjects: { id: string; name: string }[];
+  classes: { id: string; name: string }[];
 }
 
 export default function TeachersPage() {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
-  const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Teacher | null>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [subjects, setSubjects] = useState<{ id: string; name: string }[]>([]);
+  const [classes, setClasses] = useState<{ id: string; name: string }[]>([]);
+  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
+  const [selectedClasses, setSelectedClasses] = useState<string[]>([]);
 
-  const fetchTeachers = () => {
+  const fetchData = () => {
     fetch("/api/admin/teachers")
       .then((res) => res.json())
       .then(setTeachers)
       .catch(console.error);
+    fetch("/api/admin/classes")
+      .then((res) => res.json())
+      .then((data) => setClasses(data.map((c: any) => ({ id: c.id, name: c.name }))))
+      .catch(console.error);
   };
 
-  useEffect(() => { fetchTeachers(); }, []);
-
-  const filtered = teachers.filter(
-    (t) =>
-      t.user.name.toLowerCase().includes(search.toLowerCase()) ||
-      t.user.email.toLowerCase().includes(search.toLowerCase())
-  );
+  useEffect(() => { fetchData(); }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (editing) {
-      const res = await fetch(`/api/admin/teachers/${editing.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email }),
-      });
-      if (res.ok) { toast.success("Teacher updated"); fetchTeachers(); }
-      else toast.error("Failed to update");
+    const body = editing
+      ? { name, email, subjectIds: selectedSubjects, classIds: selectedClasses }
+      : { name, email, password, subjectIds: selectedSubjects, classIds: selectedClasses };
+
+    const url = editing ? `/api/admin/teachers/${editing.id}` : "/api/admin/teachers";
+    const method = editing ? "PATCH" : "POST";
+
+    const res = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+    if (res.ok) {
+      toast.success(editing ? "Teacher updated" : "Teacher created");
+      fetchData();
     } else {
-      const res = await fetch("/api/admin/teachers", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
-      });
-      if (res.ok) { toast.success("Teacher created"); fetchTeachers(); }
-      else toast.error("Failed to create");
+      toast.error(editing ? "Failed to update teacher" : "Failed to create teacher");
     }
     setOpen(false);
     resetForm();
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this teacher?")) return;
+    if (!confirm("Are you sure you want to delete this teacher?")) return;
     const res = await fetch(`/api/admin/teachers/${id}`, { method: "DELETE" });
-    if (res.ok) { toast.success("Deleted"); fetchTeachers(); }
-    else toast.error("Failed");
+    if (res.ok) {
+      toast.success("Teacher deleted");
+      fetchData();
+    } else {
+      toast.error("Failed to delete teacher");
+    }
   };
 
-  const resetForm = () => { setName(""); setEmail(""); setPassword(""); setEditing(null); };
+  const resetForm = () => {
+    setName(""); setEmail(""); setPassword(""); setSelectedSubjects([]); setSelectedClasses([]); setEditing(null);
+  };
 
-  const openEdit = (t: Teacher) => {
-    setEditing(t);
-    setName(t.user.name);
-    setEmail(t.user.email);
+  const openEdit = (teacher: Teacher) => {
+    setEditing(teacher);
+    setName(teacher.user.name);
+    setEmail(teacher.user.email);
+    setSelectedSubjects(teacher.subjects.map((s) => s.id));
+    setSelectedClasses(teacher.classes.map((c) => c.id));
     setOpen(true);
   };
+
+  const columns: ColumnDef<Teacher, any>[] = [
+    {
+      accessorKey: "user.name",
+      header: "Name",
+      cell: ({ row }) => <span className="font-medium">{row.original.user.name}</span>,
+    },
+    {
+      accessorKey: "user.email",
+      header: "Email",
+    },
+    {
+      accessorKey: "subjects",
+      header: "Subjects",
+      cell: ({ row }) =>
+        row.original.subjects.length > 0 ? (
+          <div className="flex flex-wrap gap-1">
+            {row.original.subjects.map((s: any) => (
+              <Badge key={s.id} variant="outline">{s.name}</Badge>
+            ))}
+          </div>
+        ) : (
+          <span className="text-muted-foreground">—</span>
+        ),
+    },
+    {
+      accessorKey: "classes",
+      header: "Classes",
+      cell: ({ row }) =>
+        row.original.classes.length > 0 ? (
+          <div className="flex flex-wrap gap-1">
+            {row.original.classes.map((c: any) => (
+              <Badge key={c.id} variant="secondary">{c.name}</Badge>
+            ))}
+          </div>
+        ) : (
+          <span className="text-muted-foreground">—</span>
+        ),
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => (
+        <div className="flex gap-1">
+          <Button variant="ghost" size="icon" onClick={() => openEdit(row.original)}>
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => handleDelete(row.original.id)}>
+            <Trash2 className="h-4 w-4 text-destructive" />
+          </Button>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <div className="space-y-6">
@@ -102,7 +163,8 @@ export default function TeachersPage() {
         </div>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
           <DialogTrigger render={<Button />}>
-            <Plus className="mr-2 h-4 w-4" />Add Teacher
+            <Plus className="mr-2 h-4 w-4" />
+            Add Teacher
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
@@ -115,7 +177,7 @@ export default function TeachersPage() {
               </div>
               <div className="space-y-2">
                 <Label>Email</Label>
-                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={!!editing} />
+                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required={!!editing} disabled={!!editing} />
               </div>
               {!editing && (
                 <div className="space-y-2">
@@ -123,56 +185,62 @@ export default function TeachersPage() {
                   <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
                 </div>
               )}
+              <div className="space-y-2">
+                <Label>Subjects</Label>
+                <div className="flex flex-wrap gap-2">
+                  {subjects.map((s) => (
+                    <Badge
+                      key={s.id}
+                      variant={selectedSubjects.includes(s.id) ? "default" : "outline"}
+                      className="cursor-pointer"
+                      onClick={() => {
+                        setSelectedSubjects((prev) =>
+                          prev.includes(s.id) ? prev.filter((id) => id !== s.id) : [...prev, s.id]
+                        );
+                      }}
+                    >
+                      {s.name}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Classes</Label>
+                <div className="flex flex-wrap gap-2">
+                  {classes.map((c) => (
+                    <Badge
+                      key={c.id}
+                      variant={selectedClasses.includes(c.id) ? "default" : "outline"}
+                      className="cursor-pointer"
+                      onClick={() => {
+                        setSelectedClasses((prev) =>
+                          prev.includes(c.id) ? prev.filter((id) => id !== c.id) : [...prev, c.id]
+                        );
+                      }}
+                    >
+                      {c.name}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
               <Button type="submit" className="w-full">{editing ? "Update" : "Create"}</Button>
             </form>
           </DialogContent>
         </Dialog>
       </div>
 
-      <div className="flex items-center gap-2">
-        <Search className="h-4 w-4 text-muted-foreground" />
-        <Input placeholder="Search teachers..." value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-sm" />
-      </div>
+      <StatCard
+        title="Total Teachers"
+        value={teachers.length}
+        icon={<GraduationCap className="h-4 w-4" />}
+      />
 
-      <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Subjects</TableHead>
-                <TableHead className="w-[100px]">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={4} className="text-center text-muted-foreground py-8">No teachers found.</TableCell>
-                </TableRow>
-              ) : (
-                filtered.map((t) => (
-                  <TableRow key={t.id}>
-                    <TableCell className="font-medium">{t.user.name}</TableCell>
-                    <TableCell>{t.user.email}</TableCell>
-                    <TableCell>{t.subjects.length > 0 ? t.subjects.map((s) => s.name).join(", ") : "—"}</TableCell>
-                    <TableCell>
-                      <div className="flex gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => openEdit(t)}>
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" onClick={() => handleDelete(t.id)}>
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      <DataTable
+        columns={columns}
+        data={teachers}
+        searchKey="user.name"
+        searchPlaceholder="Search by name..."
+      />
     </div>
   );
 }

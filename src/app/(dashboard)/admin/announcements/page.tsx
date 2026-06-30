@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { StatCard } from "@/components/ui/stat-card";
+import { DataTable } from "@/components/ui/data-table";
+import { type ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -12,120 +13,182 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, Trash2, Bell } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Plus, Pencil, Trash2, Bell } from "lucide-react";
 import { toast } from "sonner";
-import { formatDate } from "@/lib/utils";
 
 interface Announcement {
   id: string;
   title: string;
-  body: string;
+  content: string;
+  targetRole: string | null;
   createdAt: string;
 }
 
 export default function AnnouncementsPage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState<Announcement | null>(null);
   const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
+  const [content, setContent] = useState("");
+  const [targetRole, setTargetRole] = useState("ALL");
 
-  const fetchAnnouncements = () => {
+  const fetchData = () => {
     fetch("/api/admin/announcements")
       .then((res) => res.json())
       .then(setAnnouncements)
       .catch(console.error);
   };
 
-  useEffect(() => { fetchAnnouncements(); }, []);
+  useEffect(() => { fetchData(); }, []);
 
-  const handleCreate = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await fetch("/api/admin/announcements", {
-      method: "POST",
+    const body = { title, content, targetRole };
+    const method = editing ? "PATCH" : "POST";
+    const url = editing ? `/api/admin/announcements/${editing.id}` : "/api/admin/announcements";
+
+    const res = await fetch(url, {
+      method,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, body }),
+      body: JSON.stringify(body),
     });
+
     if (res.ok) {
-      toast.success("Announcement posted");
-      fetchAnnouncements();
-      setOpen(false);
-      setTitle("");
-      setBody("");
+      toast.success(editing ? "Announcement updated" : "Announcement posted");
+      fetchData();
     } else {
-      toast.error("Failed to post");
+      toast.error(editing ? "Failed to update" : "Failed to post");
     }
+    setOpen(false);
+    resetForm();
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this announcement?")) return;
+    if (!confirm("Are you sure you want to delete this announcement?")) return;
     const res = await fetch(`/api/admin/announcements/${id}`, { method: "DELETE" });
-    if (res.ok) { toast.success("Deleted"); fetchAnnouncements(); }
+    if (res.ok) {
+      toast.success("Announcement deleted");
+      fetchData();
+    } else {
+      toast.error("Failed to delete");
+    }
   };
+
+  const resetForm = () => {
+    setTitle(""); setContent(""); setTargetRole("ALL"); setEditing(null);
+  };
+
+  const columns: ColumnDef<Announcement, any>[] = [
+    {
+      accessorKey: "title",
+      header: "Title",
+      cell: ({ row }) => <span className="font-medium">{row.original.title}</span>,
+    },
+    {
+      accessorKey: "content",
+      header: "Content",
+      cell: ({ row }) => (
+        <span className="text-muted-foreground line-clamp-1">{row.original.content}</span>
+      ),
+    },
+    {
+      accessorKey: "targetRole",
+      header: "Target",
+      cell: ({ row }) => (
+        <Badge variant={row.original.targetRole === "ALL" ? "default" : "secondary"}>
+          {row.original.targetRole || "ALL"}
+        </Badge>
+      ),
+    },
+    {
+      accessorKey: "createdAt",
+      header: "Posted",
+      cell: ({ row }) => new Date(row.original.createdAt).toLocaleDateString(),
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => (
+        <div className="flex gap-1">
+          <Button variant="ghost" size="icon" onClick={() => {
+            setEditing(row.original);
+            setTitle(row.original.title);
+            setContent(row.original.content);
+            setTargetRole(row.original.targetRole || "ALL");
+            setOpen(true);
+          }}>
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => handleDelete(row.original.id)}>
+            <Trash2 className="h-4 w-4 text-destructive" />
+          </Button>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Announcements</h1>
-          <p className="text-muted-foreground">Post and manage school-wide announcements.</p>
+          <p className="text-muted-foreground">Post and manage school announcements.</p>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
           <DialogTrigger render={<Button />}>
-            <Plus className="mr-2 h-4 w-4" />New Announcement
+            <Plus className="mr-2 h-4 w-4" />
+            Post Announcement
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>New Announcement</DialogTitle>
+              <DialogTitle>{editing ? "Edit Announcement" : "Post Announcement"}</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleCreate} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label>Title</Label>
                 <Input value={title} onChange={(e) => setTitle(e.target.value)} required />
               </div>
               <div className="space-y-2">
-                <Label>Body</Label>
-                <textarea
-                  className="flex min-h-[100px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
-                  value={body}
-                  onChange={(e) => setBody(e.target.value)}
-                  required
-                />
+                <Label>Content</Label>
+                <Textarea value={content} onChange={(e) => setContent(e.target.value)} required rows={4} />
               </div>
-              <Button type="submit" className="w-full">Post Announcement</Button>
+              <div className="space-y-2">
+                <Label>Target Audience</Label>
+                <Select value={targetRole} onValueChange={(v) => setTargetRole(v ?? "ALL")}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ALL">Everyone</SelectItem>
+                    <SelectItem value="STUDENT">Students</SelectItem>
+                    <SelectItem value="TEACHER">Teachers</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button type="submit" className="w-full">{editing ? "Update" : "Post"}</Button>
             </form>
           </DialogContent>
         </Dialog>
       </div>
 
-      <div className="space-y-4">
-        {announcements.length === 0 ? (
-          <Card>
-            <CardContent className="py-8 text-center text-muted-foreground">
-              No announcements yet.
-            </CardContent>
-          </Card>
-        ) : (
-          announcements.map((a) => (
-            <Card key={a.id}>
-              <CardHeader className="flex flex-row items-start justify-between">
-                <div className="flex items-start gap-3">
-                  <Bell className="h-5 w-5 text-primary mt-0.5" />
-                  <div>
-                    <CardTitle className="text-lg">{a.title}</CardTitle>
-                    <p className="text-xs text-muted-foreground mt-1">{formatDate(a.createdAt)}</p>
-                  </div>
-                </div>
-                <Button variant="ghost" size="icon" onClick={() => handleDelete(a.id)}>
-                  <Trash2 className="h-4 w-4 text-destructive" />
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">{a.body}</p>
-              </CardContent>
-            </Card>
-          ))
-        )}
-      </div>
+      <StatCard title="Total Announcements" value={announcements.length} icon={<Bell className="h-4 w-4" />} />
+
+      <DataTable
+        columns={columns}
+        data={announcements}
+        searchKey="title"
+        searchPlaceholder="Search announcements..."
+      />
     </div>
   );
 }
