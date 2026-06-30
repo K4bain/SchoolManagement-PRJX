@@ -50,17 +50,17 @@ export default function StudentGradesPage() {
   }));
 
   const getScoreColor = (score: number) => {
-    if (score >= 90) return "text-green-600 dark:text-green-400";
-    if (score >= 70) return "text-blue-600 dark:text-blue-400";
-    if (score >= 50) return "text-yellow-600 dark:text-yellow-400";
-    return "text-red-600 dark:text-red-400";
+    if (score >= 90) return "text-success";
+    if (score >= 70) return "text-info";
+    if (score >= 50) return "text-warning";
+    return "text-danger";
   };
 
   const getBadgeColor = (score: number) => {
-    if (score >= 90) return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400";
-    if (score >= 70) return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400";
-    if (score >= 50) return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400";
-    return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
+    if (score >= 90) return "bg-success-light text-success";
+    if (score >= 70) return "bg-info-light text-info";
+    if (score >= 50) return "bg-warning-light text-warning";
+    return "bg-danger-light text-danger";
   };
 
   return (

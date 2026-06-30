@@ -36,9 +36,9 @@ export default function StudentAttendancePage() {
   }, []);
 
   const statusColors: Record<string, string> = {
-    PRESENT: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
-    ABSENT: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
-    LATE: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
+    PRESENT: "bg-success-light text-success",
+    ABSENT: "bg-danger-light text-danger",
+    LATE: "bg-warning-light text-warning",
   };
 
   const presentCount = attendance.filter((a) => a.status === "PRESENT").length;
