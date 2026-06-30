@@ -13,6 +13,7 @@ export default withAuth(
         return NextResponse.redirect(new URL("/teacher", req.url));
       if (token?.role === "STUDENT")
         return NextResponse.redirect(new URL("/student", req.url));
+      return NextResponse.redirect(new URL("/login", req.url));
     }
 
     if (pathname.startsWith("/admin") && token?.role !== "ADMIN")
@@ -23,6 +24,15 @@ export default withAuth(
 
     if (pathname.startsWith("/student") && token?.role !== "STUDENT")
       return NextResponse.redirect(new URL("/login", req.url));
+
+    if (pathname.startsWith("/api/admin") && token?.role !== "ADMIN")
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    if (pathname.startsWith("/api/teacher") && token?.role !== "TEACHER")
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    if (pathname.startsWith("/api/student") && token?.role !== "STUDENT")
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   },
   {
     callbacks: {
@@ -32,5 +42,5 @@ export default withAuth(
 );
 
 export const config = {
-  matcher: ["/", "/admin/:path*", "/teacher/:path*", "/student/:path*"],
+  matcher: ["/", "/admin/:path*", "/teacher/:path*", "/student/:path*", "/api/admin/:path*", "/api/teacher/:path*", "/api/student/:path*"],
 };

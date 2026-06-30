@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Bell } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 
@@ -14,12 +15,14 @@ interface Announcement {
 
 export default function StudentAnnouncementsPage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch("/api/student/announcements")
-      .then((res) => res.json())
+      .then((r) => r.ok ? r.json() : [])
       .then(setAnnouncements)
-      .catch(console.error);
+      .catch(console.error)
+      .finally(() => setLoading(false));
   }, []);
 
   return (
@@ -29,7 +32,13 @@ export default function StudentAnnouncementsPage() {
         <p className="text-sm text-muted-foreground mt-1">Latest school announcements.</p>
       </div>
       <div className="space-y-3">
-        {announcements.length === 0 ? (
+        {loading ? (
+          <>
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-[100px] rounded-lg" />
+            ))}
+          </>
+        ) : announcements.length === 0 ? (
           <Card className="shadow-sm">
             <CardContent className="flex flex-col items-center justify-center py-12 text-center">
               <div className="rounded-lg bg-muted/80 p-3 mb-3">

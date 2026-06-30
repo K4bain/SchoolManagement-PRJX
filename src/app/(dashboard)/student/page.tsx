@@ -24,9 +24,9 @@ export default function StudentDashboard() {
 
   useEffect(() => {
     Promise.all([
-      fetch("/api/student/grades").then((r) => r.json()),
-      fetch("/api/student/attendance").then((r) => r.json()),
-      fetch("/api/student/announcements").then((r) => r.json()),
+      fetch("/api/student/grades").then((r) => r.ok ? r.json() : []),
+      fetch("/api/student/attendance").then((r) => r.ok ? r.json() : []),
+      fetch("/api/student/announcements").then((r) => r.ok ? r.json() : []),
     ])
       .then(([grades, attendance, announcements]) => {
         const avg = grades.length > 0
@@ -36,8 +36,8 @@ export default function StudentDashboard() {
         const rate = attendance.length > 0 ? (present / attendance.length) * 100 : null;
         const subjects = new Set(grades.map((g: any) => g.subject.name));
         setStats({
-          averageGrade: avg ? Number(avg.toFixed(1)) : null,
-          attendanceRate: rate ? Number(rate.toFixed(1)) : null,
+          averageGrade: avg !== null ? Number(avg.toFixed(1)) : null,
+          attendanceRate: rate !== null ? Number(rate.toFixed(1)) : null,
           totalSubjects: subjects.size,
           totalAnnouncements: announcements.length,
         });

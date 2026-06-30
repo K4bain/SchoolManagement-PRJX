@@ -35,7 +35,7 @@ export default function ClassesPage() {
   const fetchData = () => {
     setLoading(true);
     fetch("/api/admin/classes")
-      .then((res) => res.json())
+      .then((res) => res.ok ? res.json() : [])
       .then(setClasses)
       .catch(console.error)
       .finally(() => setLoading(false));

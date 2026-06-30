@@ -1,15 +1,45 @@
 "use client";
 
 import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
 import { StatCard } from "@/components/ui/stat-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BookOpen, ClipboardCheck, Users, BarChart3 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
+
+interface TeacherStats {
+  totalSubjects: number;
+  totalStudents: number;
+}
 
 export default function TeacherDashboard() {
   const { data: session } = useSession();
   const user = session?.user as any;
+  const [stats, setStats] = useState<TeacherStats | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/teacher/subjects")
+      .then((r) => r.ok ? r.json() : [])
+      .then((subjects) => {
+        const uniqueStudents = new Set<string>();
+        let totalStudents = 0;
+        for (const s of subjects) {
+          if (s.class?.students) {
+            totalStudents += s.class.students.length;
+            s.class.students.forEach((st: any) => uniqueStudents.add(st.id));
+          }
+        }
+        setStats({
+          totalSubjects: subjects.length,
+          totalStudents: uniqueStudents.size || totalStudents,
+        });
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <div className="space-y-8">
@@ -21,9 +51,19 @@ export default function TeacherDashboard() {
       </div>
 
       <div className="grid gap-4 grid-cols-3">
-        <StatCard title="My Subjects" value="—" icon={<BookOpen className="h-4 w-4" />} />
-        <StatCard title="Attendance Today" value="—" icon={<ClipboardCheck className="h-4 w-4" />} />
-        <StatCard title="Total Students" value="—" icon={<Users className="h-4 w-4" />} />
+        {loading ? (
+          <>
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-[108px] rounded-lg" />
+            ))}
+          </>
+        ) : (
+          <>
+            <StatCard title="My Subjects" value={stats?.totalSubjects ?? 0} icon={<BookOpen className="h-4 w-4" />} />
+            <StatCard title="Total Students" value={stats?.totalStudents ?? 0} icon={<Users className="h-4 w-4" />} />
+            <StatCard title="Attendance Today" value="—" icon={<ClipboardCheck className="h-4 w-4" />} />
+          </>
+        )}
       </div>
 
       <Card className="shadow-sm">

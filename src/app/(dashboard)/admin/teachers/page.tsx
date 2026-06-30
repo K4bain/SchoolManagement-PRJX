@@ -46,8 +46,8 @@ export default function TeachersPage() {
   const fetchData = () => {
     setLoading(true);
     Promise.all([
-      fetch("/api/admin/teachers").then((r) => r.json()),
-      fetch("/api/admin/subjects").then((r) => r.json()),
+      fetch("/api/admin/teachers").then((r) => r.ok ? r.json() : []),
+      fetch("/api/admin/subjects").then((r) => r.ok ? r.json() : []),
     ])
       .then(([teachersData, subjectsData]) => {
         setTeachers(teachersData);

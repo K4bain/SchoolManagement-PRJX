@@ -29,7 +29,7 @@ export default function StudentAttendancePage() {
 
   useEffect(() => {
     fetch("/api/student/attendance")
-      .then((res) => res.json())
+      .then((r) => r.ok ? r.json() : [])
       .then(setAttendance)
       .catch(console.error)
       .finally(() => setLoading(false));

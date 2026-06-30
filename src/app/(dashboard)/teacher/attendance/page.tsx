@@ -50,7 +50,7 @@ export default function AttendancePage() {
 
   useEffect(() => {
     fetch("/api/teacher/subjects")
-      .then((res) => res.json())
+      .then((res) => res.ok ? res.json() : [])
       .then(setSubjects)
       .catch(console.error)
       .finally(() => setLoadingSubjects(false));
@@ -60,7 +60,7 @@ export default function AttendancePage() {
     if (!selectedSubject) return;
     setLoadingStudents(true);
     fetch(`/api/teacher/attendance?subjectId=${selectedSubject}`)
-      .then((res) => res.json())
+      .then((res) => res.ok ? res.json() : { students: [], existing: [] })
       .then((data) => {
         setStudents(data.students || []);
         const existing: Record<string, AttendanceRecord> = {};

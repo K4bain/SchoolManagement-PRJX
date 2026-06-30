@@ -53,7 +53,7 @@ export default function GradesPage() {
 
   useEffect(() => {
     fetch("/api/teacher/subjects")
-      .then((res) => res.json())
+      .then((res) => res.ok ? res.json() : [])
       .then(setSubjects)
       .catch(console.error)
       .finally(() => setLoadingSubjects(false));
@@ -63,7 +63,7 @@ export default function GradesPage() {
     if (!selectedSubject) return;
     setLoadingStudents(true);
     fetch(`/api/teacher/grades?subjectId=${selectedSubject}`)
-      .then((res) => res.json())
+      .then((res) => res.ok ? res.json() : { students: [] })
       .then((data) => setStudents(data.students || []))
       .catch(console.error)
       .finally(() => setLoadingStudents(false));

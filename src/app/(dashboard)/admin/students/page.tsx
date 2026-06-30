@@ -41,8 +41,8 @@ export default function StudentsPage() {
   const fetchData = () => {
     setLoading(true);
     Promise.all([
-      fetch("/api/admin/students").then((r) => r.json()),
-      fetch("/api/admin/classes").then((r) => r.json()),
+      fetch("/api/admin/students").then((r) => r.ok ? r.json() : []),
+      fetch("/api/admin/classes").then((r) => r.ok ? r.json() : []),
     ])
       .then(([studentsData, classesData]) => {
         setStudents(studentsData);

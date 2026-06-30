@@ -38,7 +38,7 @@ export default function AnnouncementsPage() {
   const fetchData = () => {
     setLoading(true);
     fetch("/api/admin/announcements")
-      .then((res) => res.json())
+      .then((res) => res.ok ? res.json() : [])
       .then(setAnnouncements)
       .catch(console.error)
       .finally(() => setLoading(false));

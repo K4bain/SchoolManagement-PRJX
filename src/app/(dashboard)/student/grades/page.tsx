@@ -31,7 +31,7 @@ export default function StudentGradesPage() {
 
   useEffect(() => {
     fetch("/api/student/grades")
-      .then((res) => res.json())
+      .then((r) => r.ok ? r.json() : [])
       .then(setGrades)
       .catch(console.error)
       .finally(() => setLoading(false));
