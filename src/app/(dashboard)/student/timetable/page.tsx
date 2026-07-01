@@ -48,7 +48,8 @@ export default function StudentTimetablePage() {
           ))}
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="overflow-x-auto">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 min-w-0">
           {DAYS.map((day) => (
             <Card key={day} className="shadow-sm">
               <CardHeader className="pb-2">
@@ -82,6 +83,7 @@ export default function StudentTimetablePage() {
               </CardContent>
             </Card>
           ))}
+        </div>
         </div>
       )}
     </div>

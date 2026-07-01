@@ -61,7 +61,7 @@ export default function TeacherAnnouncementsPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground">{a.body}</p>
+                <p className="text-sm text-muted-foreground line-clamp-3">{a.body}</p>
               </CardContent>
             </Card>
           ))
