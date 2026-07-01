@@ -38,11 +38,12 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/30 p-4">
-      <Card className="w-full max-w-sm shadow-sm">
+    <div className="flex min-h-screen items-center justify-center p-4 relative">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5" />
+      <Card className="w-full max-w-sm shadow-lg relative z-10">
         <CardHeader className="space-y-1 text-center">
-          <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground mb-1">
-            <GraduationCap className="h-5 w-5" />
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground mb-1">
+            <GraduationCap className="h-6 w-6" />
           </div>
           <CardTitle className="text-xl font-semibold">SchoolHub</CardTitle>
           <CardDescription className="text-sm text-muted-foreground">

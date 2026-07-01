@@ -124,8 +124,14 @@ export function DataTable<TData, TValue>({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
-                  No results.
+                <TableCell colSpan={columns.length} className="h-32">
+                  <div className="flex flex-col items-center justify-center text-center">
+                    <div className="rounded-lg bg-muted/80 p-3 mb-3">
+                      <Search className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                    <p className="text-sm font-medium">No results found</p>
+                    <p className="text-xs text-muted-foreground mt-1">Try adjusting your search or filters.</p>
+                  </div>
                 </TableCell>
               </TableRow>
             )}

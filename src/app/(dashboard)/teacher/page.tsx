@@ -12,6 +12,7 @@ import Link from "next/link";
 interface TeacherStats {
   totalSubjects: number;
   totalStudents: number;
+  attendanceToday: number;
 }
 
 export default function TeacherDashboard() {
@@ -21,22 +22,9 @@ export default function TeacherDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/teacher/subjects")
-      .then((r) => r.ok ? r.json() : [])
-      .then((subjects) => {
-        const uniqueStudents = new Set<string>();
-        let totalStudents = 0;
-        for (const s of subjects) {
-          if (s.class?.students) {
-            totalStudents += s.class.students.length;
-            s.class.students.forEach((st: any) => uniqueStudents.add(st.id));
-          }
-        }
-        setStats({
-          totalSubjects: subjects.length,
-          totalStudents: uniqueStudents.size || totalStudents,
-        });
-      })
+    fetch("/api/teacher/stats")
+      .then((r) => r.ok ? r.json() : null)
+      .then(setStats)
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
@@ -61,7 +49,7 @@ export default function TeacherDashboard() {
           <>
             <StatCard title="My Subjects" value={stats?.totalSubjects ?? 0} icon={<BookOpen className="h-4 w-4" />} />
             <StatCard title="Total Students" value={stats?.totalStudents ?? 0} icon={<Users className="h-4 w-4" />} />
-            <StatCard title="Attendance Today" value="—" icon={<ClipboardCheck className="h-4 w-4" />} />
+            <StatCard title="Attendance Today" value={stats?.attendanceToday ?? 0} icon={<ClipboardCheck className="h-4 w-4" />} />
           </>
         )}
       </div>
