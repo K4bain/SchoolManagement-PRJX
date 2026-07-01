@@ -16,7 +16,8 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Pencil, Trash2, Bell, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Bell, Loader2, Download } from "lucide-react";
+import { exportToCSV } from "@/lib/csv";
 import { toast } from "sonner";
 import { PageTitle } from "@/components/PageTitle";
 
@@ -138,6 +139,27 @@ export default function AnnouncementsPage() {
           <h1 className="text-2xl font-semibold tracking-tight">Announcements</h1>
           <p className="text-sm text-muted-foreground mt-1">Post and manage school announcements.</p>
         </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              exportToCSV(
+                announcements.map((a) => ({
+                  title: a.title,
+                  created: new Date(a.createdAt).toLocaleDateString(),
+                })),
+                [
+                  { key: "title", label: "Title" },
+                  { key: "created", label: "Created" },
+                ],
+                "announcements.csv"
+              )
+            }
+          >
+            <Download className="mr-2 h-4 w-4" />
+            Export CSV
+          </Button>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
           <DialogTrigger render={<Button />}>
             <Plus className="mr-2 h-4 w-4" />
@@ -175,6 +197,7 @@ export default function AnnouncementsPage() {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {loading ? (

@@ -40,12 +40,33 @@ export async function GET() {
       },
     });
 
+    const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const todayName = dayNames[new Date().getDay()] as any;
+
+    const todaySchedule = await prisma.timetable.findMany({
+      where: {
+        subject: { teacherId: teacher.id },
+        day: todayName,
+      },
+      include: { subject: true, class: true },
+      orderBy: { startTime: "asc" },
+    });
+
+    const recentGrades = await prisma.grade.findMany({
+      where: { subject: { teacherId: teacher.id } },
+      include: { student: { include: { user: true } }, subject: true },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+    });
+
     return NextResponse.json({
       totalSubjects: subjects.length,
       totalStudents: uniqueStudentIds.size || totalStudents,
       attendanceToday,
+      todaySchedule,
+      recentGrades,
     });
   } catch {
-    return NextResponse.json({ totalSubjects: 0, totalStudents: 0, attendanceToday: 0 });
+    return NextResponse.json({ totalSubjects: 0, totalStudents: 0, attendanceToday: 0, todaySchedule: [], recentGrades: [] });
   }
 }

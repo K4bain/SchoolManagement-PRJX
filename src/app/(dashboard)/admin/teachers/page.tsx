@@ -16,7 +16,8 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Plus, Pencil, Trash2, GraduationCap, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, GraduationCap, Loader2, Download } from "lucide-react";
+import { exportToCSV } from "@/lib/csv";
 import { toast } from "sonner";
 import { PageTitle } from "@/components/PageTitle";
 
@@ -190,6 +191,29 @@ export default function TeachersPage() {
           <h1 className="text-2xl font-semibold tracking-tight">Teachers</h1>
           <p className="text-sm text-muted-foreground mt-1">Manage teacher accounts and assignments.</p>
         </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              exportToCSV(
+                teachers.map((t) => ({
+                  name: t.user.name,
+                  email: t.user.email,
+                  subjects: t.subjects.map((s) => s.name).join("; "),
+                })),
+                [
+                  { key: "name", label: "Name" },
+                  { key: "email", label: "Email" },
+                  { key: "subjects", label: "Subjects" },
+                ],
+                "teachers.csv"
+              )
+            }
+          >
+            <Download className="mr-2 h-4 w-4" />
+            Export CSV
+          </Button>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
           <DialogTrigger render={<Button />}>
             <Plus className="mr-2 h-4 w-4" />
@@ -265,6 +289,7 @@ export default function TeachersPage() {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {loading ? (
