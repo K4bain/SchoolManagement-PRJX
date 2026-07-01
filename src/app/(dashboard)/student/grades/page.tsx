@@ -14,6 +14,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { BarChart3 } from "lucide-react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell } from "@/components/charts/dynamic-chart";
+import { PageTitle } from "@/components/PageTitle";
 
 interface Grade {
   id: string;
@@ -65,6 +66,7 @@ export default function StudentGradesPage() {
 
   return (
     <div className="space-y-6">
+      <PageTitle title="My Grades" />
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">My Grades</h1>
         <p className="text-sm text-muted-foreground mt-1">View your grades across all subjects.</p>

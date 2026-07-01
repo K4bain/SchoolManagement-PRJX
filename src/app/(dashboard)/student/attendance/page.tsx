@@ -15,6 +15,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ClipboardCheck, Users, CheckCircle } from "lucide-react";
 import { formatDate } from "@/lib/utils";
+import { PageTitle } from "@/components/PageTitle";
 
 interface Attendance {
   id: string;
@@ -47,6 +48,7 @@ export default function StudentAttendancePage() {
 
   return (
     <div className="space-y-6">
+      <PageTitle title="My Attendance" />
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">My Attendance</h1>
         <p className="text-sm text-muted-foreground mt-1">Track your attendance record.</p>

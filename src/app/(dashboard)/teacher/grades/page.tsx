@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/table";
 import { toast } from "sonner";
 import { BarChart3, Save, Loader2, Users } from "lucide-react";
+import { PageTitle } from "@/components/PageTitle";
 
 interface Subject {
   id: string;
@@ -100,6 +101,7 @@ export default function GradesPage() {
 
   return (
     <div className="space-y-6">
+      <PageTitle title="Grades" />
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Enter Grades</h1>
         <p className="text-sm text-muted-foreground mt-1">Select a subject and enter grades for your students.</p>

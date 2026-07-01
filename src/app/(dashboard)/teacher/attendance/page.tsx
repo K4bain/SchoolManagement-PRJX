@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/table";
 import { toast } from "sonner";
 import { ClipboardCheck, Loader2, Users } from "lucide-react";
+import { PageTitle } from "@/components/PageTitle";
 
 interface Subject {
   id: string;
@@ -107,6 +108,7 @@ export default function AttendancePage() {
 
   return (
     <div className="space-y-6">
+      <PageTitle title="Attendance" />
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Mark Attendance</h1>
         <p className="text-sm text-muted-foreground mt-1">Select a class and mark student attendance for today.</p>

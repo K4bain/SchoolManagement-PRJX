@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Bell } from "lucide-react";
 import { formatDate } from "@/lib/utils";
+import { PageTitle } from "@/components/PageTitle";
 
 interface Announcement {
   id: string;
@@ -27,6 +28,7 @@ export default function StudentAnnouncementsPage() {
 
   return (
     <div className="space-y-6">
+      <PageTitle title="Announcements" />
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Announcements</h1>
         <p className="text-sm text-muted-foreground mt-1">Latest school announcements.</p>

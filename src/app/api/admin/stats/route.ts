@@ -8,7 +8,10 @@ export async function GET() {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const [totalStudents, totalTeachers, totalClasses, totalAnnouncements, attendanceToday] =
+    const sevenDaysAgo = new Date(today);
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+
+    const [totalStudents, totalTeachers, totalClasses, totalAnnouncements, attendanceToday, attendanceTrend] =
       await Promise.all([
         prisma.student.count(),
         prisma.teacher.count(),
@@ -17,6 +20,13 @@ export async function GET() {
         prisma.attendance.count({
           where: { date: { gte: today, lt: tomorrow } },
         }),
+        prisma.$queryRaw<{ date: Date; count: bigint }[]>`
+          SELECT DATE(date) as date, COUNT(*) as count
+          FROM attendance
+          WHERE date >= ${sevenDaysAgo}
+          GROUP BY DATE(date)
+          ORDER BY date ASC
+        `,
       ]);
 
     return NextResponse.json({
@@ -25,6 +35,10 @@ export async function GET() {
       totalClasses,
       totalAnnouncements,
       attendanceToday,
+      attendanceTrend: attendanceTrend.map((row) => ({
+        date: row.date,
+        count: Number(row.count),
+      })),
     });
   } catch {
     return NextResponse.json({ error: "Failed to fetch stats" }, { status: 500 });

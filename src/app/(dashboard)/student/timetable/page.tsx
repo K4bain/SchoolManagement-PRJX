@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Calendar } from "lucide-react";
+import { PageTitle } from "@/components/PageTitle";
 
 interface TimetableEntry {
   id: string;
@@ -36,6 +37,7 @@ export default function StudentTimetablePage() {
 
   return (
     <div className="space-y-6">
+      <PageTitle title="Timetable" />
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Timetable</h1>
         <p className="text-sm text-muted-foreground mt-1">Your weekly class schedule.</p>

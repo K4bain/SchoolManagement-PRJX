@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart3, ClipboardCheck, Calendar, Bell } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
+import { PageTitle } from "@/components/PageTitle";
 
 interface StudentStats {
   averageGrade: number | null;
@@ -48,6 +49,7 @@ export default function StudentDashboard() {
 
   return (
     <div className="space-y-8">
+      <PageTitle title="Student Dashboard" />
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Student Dashboard</h1>
         <p className="text-sm text-muted-foreground mt-1">

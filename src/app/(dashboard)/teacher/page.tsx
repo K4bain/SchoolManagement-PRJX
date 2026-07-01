@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BookOpen, ClipboardCheck, Users, BarChart3 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
+import { PageTitle } from "@/components/PageTitle";
 
 interface TeacherStats {
   totalSubjects: number;
@@ -31,6 +32,7 @@ export default function TeacherDashboard() {
 
   return (
     <div className="space-y-8">
+      <PageTitle title="Teacher Dashboard" />
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Teacher Dashboard</h1>
         <p className="text-sm text-muted-foreground mt-1">

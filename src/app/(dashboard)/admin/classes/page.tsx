@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Plus, Pencil, Trash2, BookOpen, Users, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { PageTitle } from "@/components/PageTitle";
 
 interface Class {
   id: string;
@@ -86,6 +87,7 @@ export default function ClassesPage() {
 
   return (
     <div className="space-y-6">
+      <PageTitle title="Classes" />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Classes</h1>

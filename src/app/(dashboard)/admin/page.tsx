@@ -5,9 +5,26 @@ import { StatCard } from "@/components/ui/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Users, GraduationCap, BookOpen, Bell, ClipboardCheck } from "lucide-react";
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell } from "@/components/charts/dynamic-chart";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Cell,
+} from "@/components/charts/dynamic-chart";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
+import { PageTitle } from "@/components/PageTitle";
+
+interface AttendanceTrend {
+  date: string;
+  count: number;
+}
 
 interface Stats {
   totalStudents: number;
@@ -15,6 +32,7 @@ interface Stats {
   totalClasses: number;
   totalAnnouncements: number;
   attendanceToday: number;
+  attendanceTrend: AttendanceTrend[];
 }
 
 const COLORS = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)", "var(--chart-4)"];
@@ -25,7 +43,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetch("/api/admin/stats")
-      .then((res) => res.ok ? res.json() : null)
+      .then((res) => (res.ok ? res.json() : null))
       .then(setStats)
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -39,8 +57,16 @@ export default function AdminDashboard() {
       ]
     : [];
 
+  const trendData = stats?.attendanceTrend
+    ? stats.attendanceTrend.map((d) => ({
+        date: new Date(d.date).toLocaleDateString("en-US", { weekday: "short" }),
+        count: d.count,
+      }))
+    : [];
+
   return (
     <div className="space-y-8">
+      <PageTitle title="Admin Dashboard" />
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Admin Dashboard</h1>
         <p className="text-sm text-muted-foreground mt-1">
@@ -113,28 +139,62 @@ export default function AdminDashboard() {
         </Card>
         <Card className="shadow-sm">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base font-medium">Quick Actions</CardTitle>
+            <CardTitle className="text-base font-medium">Attendance Trend (7 days)</CardTitle>
           </CardHeader>
-          <CardContent className="flex flex-col gap-2">
-            <Button render={<Link href="/admin/students" />} variant="outline" className="justify-start h-9 transition-colors duration-150">
-              <Users className="mr-2 h-4 w-4 text-muted-foreground" />
-              Manage Students
-            </Button>
-            <Button render={<Link href="/admin/teachers" />} variant="outline" className="justify-start h-9 transition-colors duration-150">
-              <GraduationCap className="mr-2 h-4 w-4 text-muted-foreground" />
-              Manage Teachers
-            </Button>
-            <Button render={<Link href="/admin/classes" />} variant="outline" className="justify-start h-9 transition-colors duration-150">
-              <BookOpen className="mr-2 h-4 w-4 text-muted-foreground" />
-              Manage Classes
-            </Button>
-            <Button render={<Link href="/admin/announcements" />} variant="outline" className="justify-start h-9 transition-colors duration-150">
-              <Bell className="mr-2 h-4 w-4 text-muted-foreground" />
-              Post Announcement
-            </Button>
+          <CardContent>
+            {loading ? (
+              <Skeleton className="h-[250px] w-full" />
+            ) : trendData.length === 0 ? (
+              <div className="flex items-center justify-center h-[250px] text-sm text-muted-foreground">
+                No attendance data yet
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={250}>
+                <AreaChart data={trendData}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                  <XAxis dataKey="date" className="text-xs" />
+                  <YAxis className="text-xs" />
+                  <Tooltip />
+                  <Area
+                    type="monotone"
+                    dataKey="count"
+                    stroke="var(--chart-1)"
+                    fill="var(--chart-1)"
+                    fillOpacity={0.15}
+                    strokeWidth={2}
+                    dot={{ fill: "var(--chart-1)", r: 3 }}
+                    activeDot={{ r: 5 }}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
       </div>
+
+      <Card className="shadow-sm">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base font-medium">Quick Actions</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-wrap gap-2">
+          <Button render={<Link href="/admin/students" />} variant="outline" className="justify-start h-9 transition-colors duration-150">
+            <Users className="mr-2 h-4 w-4 text-muted-foreground" />
+            Manage Students
+          </Button>
+          <Button render={<Link href="/admin/teachers" />} variant="outline" className="justify-start h-9 transition-colors duration-150">
+            <GraduationCap className="mr-2 h-4 w-4 text-muted-foreground" />
+            Manage Teachers
+          </Button>
+          <Button render={<Link href="/admin/classes" />} variant="outline" className="justify-start h-9 transition-colors duration-150">
+            <BookOpen className="mr-2 h-4 w-4 text-muted-foreground" />
+            Manage Classes
+          </Button>
+          <Button render={<Link href="/admin/announcements" />} variant="outline" className="justify-start h-9 transition-colors duration-150">
+            <Bell className="mr-2 h-4 w-4 text-muted-foreground" />
+            Post Announcement
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 }

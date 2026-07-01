@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Pencil, Trash2, Bell, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { PageTitle } from "@/components/PageTitle";
 
 interface Announcement {
   id: string;
@@ -131,6 +132,7 @@ export default function AnnouncementsPage() {
 
   return (
     <div className="space-y-6">
+      <PageTitle title="Announcements" />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Announcements</h1>
