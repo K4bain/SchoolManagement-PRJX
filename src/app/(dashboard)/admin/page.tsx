@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { StatCard } from "@/components/ui/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, GraduationCap, BookOpen, Bell } from "lucide-react";
+import { Users, GraduationCap, BookOpen, Bell, ClipboardCheck } from "lucide-react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell } from "@/components/charts/dynamic-chart";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
@@ -14,6 +14,7 @@ interface Stats {
   totalTeachers: number;
   totalClasses: number;
   totalAnnouncements: number;
+  attendanceToday: number;
 }
 
 const COLORS = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)", "var(--chart-4)"];
@@ -47,10 +48,10 @@ export default function AdminDashboard() {
         </p>
       </div>
 
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
         {loading ? (
           <>
-            {[1, 2, 3, 4].map((i) => (
+            {[1, 2, 3, 4, 5].map((i) => (
               <Skeleton key={i} className="h-[108px] rounded-lg" />
             ))}
           </>
@@ -75,6 +76,11 @@ export default function AdminDashboard() {
               title="Announcements"
               value={stats?.totalAnnouncements ?? 0}
               icon={<Bell className="h-4 w-4" />}
+            />
+            <StatCard
+              title="Attendance Today"
+              value={stats?.attendanceToday ?? 0}
+              icon={<ClipboardCheck className="h-4 w-4" />}
             />
           </>
         )}

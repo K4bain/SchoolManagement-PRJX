@@ -86,8 +86,14 @@ export default function StudentAttendancePage() {
               <TableBody>
                 {attendance.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={3} className="text-center text-muted-foreground py-8">
-                      No attendance records yet.
+                    <TableCell colSpan={3}>
+                      <div className="flex flex-col items-center justify-center py-12 text-center">
+                        <div className="rounded-lg bg-muted/80 p-3 mb-3">
+                          <ClipboardCheck className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                        <p className="text-base font-medium">No attendance records</p>
+                        <p className="text-sm text-muted-foreground mt-1">Your attendance history will appear here.</p>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ) : (
