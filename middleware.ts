@@ -10,25 +10,46 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  if (pathname.startsWith("/login")) {
-    if (token) return NextResponse.redirect(new URL("/", request.url));
+  // Allow public paths through without auth
+  if (
+    pathname.startsWith("/login") ||
+    pathname === "/" ||
+    pathname === "/landing.html" ||
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/api/auth") ||
+    pathname === "/favicon.ico"
+  ) {
+    // If logged in and visiting /, redirect to dashboard
+    if (pathname === "/" && token) {
+      if (token.role === "ADMIN")
+        return NextResponse.redirect(new URL("/admin", request.url));
+      if (token.role === "TEACHER")
+        return NextResponse.redirect(new URL("/teacher", request.url));
+      if (token.role === "STUDENT")
+        return NextResponse.redirect(new URL("/student", request.url));
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+
+    // If logged in and visiting /login, redirect to dashboard
+    if (pathname.startsWith("/login") && token) {
+      if (token.role === "ADMIN")
+        return NextResponse.redirect(new URL("/admin", request.url));
+      if (token.role === "TEACHER")
+        return NextResponse.redirect(new URL("/teacher", request.url));
+      if (token.role === "STUDENT")
+        return NextResponse.redirect(new URL("/student", request.url));
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+
     return NextResponse.next();
   }
 
+  // All other routes require auth
   if (!token) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  if (pathname === "/") {
-    if (token.role === "ADMIN")
-      return NextResponse.redirect(new URL("/admin", request.url));
-    if (token.role === "TEACHER")
-      return NextResponse.redirect(new URL("/teacher", request.url));
-    if (token.role === "STUDENT")
-      return NextResponse.redirect(new URL("/student", request.url));
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
-
+  // Role-based access control
   if (pathname.startsWith("/admin") && token.role !== "ADMIN")
     return NextResponse.redirect(new URL("/login", request.url));
 
@@ -52,6 +73,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico|public|landing.html).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico).*)",
   ],
 };
