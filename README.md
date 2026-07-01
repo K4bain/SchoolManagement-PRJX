@@ -1,12 +1,29 @@
 # SchoolHub — School Management System
 
-A fullstack school management platform built with Next.js, featuring role-based authentication for admins, teachers, and students.
+A fullstack school management platform built with Next.js, featuring role-based authentication for admins, teachers, and students — with a polished marketing landing page.
 
 ## Live Demo
 
-🔗 [View Live Demo](https://school-management-jet-rho.vercel.app)
+- Landing page: [school-management-jet-rho.vercel.app](https://school-management-jet-rho.vercel.app)
+- Login: [school-management-jet-rho.vercel.app/login](https://school-management-jet-rho.vercel.app/login)
+
+### Test Accounts
+
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | admin@school.com | admin123 |
+| Teacher | teacher@school.com | teacher123 |
+| Student | student@school.com | student123 |
 
 ## Features
+
+### Landing Page
+- Marketing site with hero, features, role showcase, stats, and pricing
+- Animated mesh gradient hero with floating dashboard preview
+- Intersection Observer fade-up reveal animations
+- Tabbed role showcase (Admin/Teacher/Student)
+- Counter animation on scroll
+- Fully responsive with mobile hamburger menu
 
 ### Admin Dashboard
 - Manage students, teachers, and classes (CRUD)
@@ -30,6 +47,8 @@ A fullstack school management platform built with Next.js, featuring role-based 
 - **Dark mode** — Full dark theme with system preference detection
 - **Responsive design** — Works on mobile, tablet, and desktop
 - **Real-time data** — Server-side API routes with Prisma ORM
+- **Loading & error states** — Skeleton spinners and error boundaries per dashboard
+- **SSR-safe charts** — Dynamic imports for Recharts
 
 ## Tech Stack
 
@@ -56,7 +75,7 @@ A fullstack school management platform built with Next.js, featuring role-based 
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR-USERNAME/school-management.git
+git clone https://github.com/K4bain/SchoolManagement-PRJX-.git
 cd school-management
 
 # Install dependencies
@@ -85,34 +104,32 @@ NEXTAUTH_SECRET="your-random-secret"
 NEXTAUTH_URL="http://localhost:3000"
 ```
 
-### Test Accounts
-
-| Role | Email | Password |
-|------|-------|----------|
-| Admin | admin@school.com | admin123 |
-| Teacher | teacher@school.com | teacher123 |
-| Student | student@school.com | student123 |
-
 ## Project Structure
 
 ```
 src/
 ├── app/
-│   ├── (auth)/login/          # Login page
+│   ├── (auth)/login/              # Login page
+│   ├── (marketing)/               # Landing page (no sidebar)
+│   │   ├── layout.tsx
+│   │   └── page.tsx
 │   ├── (dashboard)/
-│   │   ├── admin/             # Admin pages (CRUD)
-│   │   ├── teacher/           # Teacher pages (attendance, grades)
-│   │   ├── student/           # Student pages (grades, timetable)
-│   │   └── layout.tsx         # Dashboard layout (sidebar + topbar)
-│   └── api/                   # API routes
+│   │   ├── admin/                 # Admin pages (CRUD)
+│   │   ├── teacher/               # Teacher pages (attendance, grades)
+│   │   ├── student/               # Student pages (grades, timetable)
+│   │   └── layout.tsx             # Dashboard layout (sidebar + topbar)
+│   └── api/                       # API routes
 ├── components/
-│   ├── layout/                # Sidebar, Topbar
-│   └── ui/                    # shadcn/ui components
+│   ├── charts/                    # Dynamic Recharts imports
+│   ├── layout/                    # Sidebar, Topbar, CommandPalette
+│   └── ui/                        # shadcn/ui components
+├── hooks/                         # Custom React hooks
 ├── lib/
-│   ├── auth.ts                # NextAuth config
-│   ├── prisma.ts              # Prisma client singleton
-│   └── utils.ts               # Utility functions
-└── middleware.ts               # Route protection
+│   ├── auth.ts                    # NextAuth config
+│   ├── prisma.ts                  # Prisma client singleton
+│   └── utils.ts                   # Utility functions
+├── types/                         # TypeScript type augmentations
+└── middleware.ts                   # Route protection + role guards
 ```
 
 ## Database Schema
