@@ -12,6 +12,7 @@ import {
   BarChart3,
   Calendar,
   Bell,
+  Home,
 } from "lucide-react";
 import {
   Sidebar,
@@ -35,6 +36,7 @@ interface NavItem {
 }
 
 const adminNav: NavItem[] = [
+  { label: "Home", href: "/", icon: Home },
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { label: "Students", href: "/admin/students", icon: Users },
   { label: "Teachers", href: "/admin/teachers", icon: GraduationCap },
@@ -43,6 +45,7 @@ const adminNav: NavItem[] = [
 ];
 
 const teacherNav: NavItem[] = [
+  { label: "Home", href: "/", icon: Home },
   { label: "Dashboard", href: "/teacher", icon: LayoutDashboard },
   { label: "Attendance", href: "/teacher/attendance", icon: ClipboardCheck },
   { label: "Grades", href: "/teacher/grades", icon: BarChart3 },
@@ -50,6 +53,7 @@ const teacherNav: NavItem[] = [
 ];
 
 const studentNav: NavItem[] = [
+  { label: "Home", href: "/", icon: Home },
   { label: "Dashboard", href: "/student", icon: LayoutDashboard },
   { label: "Grades", href: "/student/grades", icon: BarChart3 },
   { label: "Attendance", href: "/student/attendance", icon: ClipboardCheck },
@@ -102,9 +106,11 @@ export function AppSidebar() {
             <SidebarMenu>
               {navItems.map((item) => {
                 const isActive =
-                  item.href === `/${role?.toLowerCase()}`
-                    ? pathname === item.href
-                    : pathname.startsWith(item.href);
+                  item.href === "/"
+                    ? pathname === "/"
+                    : item.href === `/${role?.toLowerCase()}`
+                      ? pathname === item.href
+                      : pathname.startsWith(item.href);
                 return (
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import {
   CommandDialog,
   CommandEmpty,
@@ -23,6 +23,7 @@ import {
   Bell,
   Plus,
   Home,
+  LogOut,
 } from "lucide-react";
 
 interface CommandItem {
@@ -138,6 +139,16 @@ export function CommandPalette() {
             </CommandGroup>
           </>
         )}
+        <CommandSeparator />
+        <CommandGroup heading="Account">
+          <CommandItem
+            value="Sign Out"
+            onSelect={() => { setOpen(false); signOut({ callbackUrl: "/" }); }}
+          >
+            <LogOut className="mr-2 size-4" />
+            <span>Sign Out</span>
+          </CommandItem>
+        </CommandGroup>
       </CommandList>
     </CommandDialog>
   );

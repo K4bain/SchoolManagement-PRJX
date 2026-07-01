@@ -18,7 +18,10 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "SchoolHub",
+  title: {
+    template: "%s — SchoolHub",
+    default: "SchoolHub",
+  },
   description: "A comprehensive school management platform",
   icons: {
     icon: "/favicon.svg",
