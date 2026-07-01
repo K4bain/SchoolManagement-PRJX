@@ -22,6 +22,7 @@ import {
   Calendar,
   Bell,
   Plus,
+  Home,
 } from "lucide-react";
 
 interface CommandItem {
@@ -93,6 +94,11 @@ export function CommandPalette() {
         ? teacherItems
         : studentItems;
 
+  const allNavItems = [
+    { label: "Home", href: "/", icon: Home, group: "Navigation" },
+    ...navItems,
+  ];
+
   const runCommand = (href: string) => {
     setOpen(false);
     router.push(href);
@@ -104,7 +110,7 @@ export function CommandPalette() {
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
         <CommandGroup heading="Navigation">
-          {navItems.map((item) => (
+          {allNavItems.map((item) => (
             <CommandItem
               key={item.href}
               value={item.label}

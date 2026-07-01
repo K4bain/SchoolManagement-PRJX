@@ -2,6 +2,7 @@
 
 import { useSession, signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
+import Link from "next/link";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -17,7 +18,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { getInitials } from "@/lib/utils";
-import { LogOut, Moon, Sun, ChevronsUpDown } from "lucide-react";
+import { LogOut, Moon, Sun, ChevronsUpDown, Home } from "lucide-react";
 
 const roleLabels: Record<string, string> = {
   ADMIN: "Administrator",
@@ -68,6 +69,10 @@ export function NavUser() {
               <p className="text-xs text-muted-foreground">{user?.email}</p>
             </div>
             <DropdownMenuSeparator />
+            <DropdownMenuItem render={<Link href="/" />}>
+              <Home className="mr-2 h-4 w-4" />
+              Back to Home
+            </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             >
@@ -76,7 +81,7 @@ export function NavUser() {
               Toggle theme
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/login" })}>
+            <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/" })}>
               <LogOut className="mr-2 h-4 w-4" />
               Sign out
             </DropdownMenuItem>

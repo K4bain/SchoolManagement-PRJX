@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { GraduationCap, Loader2 } from "lucide-react";
+import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -85,7 +86,12 @@ export default function LoginPage() {
               )}
             </Button>
           </form>
-          <div className="mt-5 rounded-lg border bg-muted/50 p-3 text-xs text-muted-foreground">
+          <div className="mt-4 text-center">
+            <Link href="/" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+              ← Back to home
+            </Link>
+          </div>
+          <div className="mt-4 rounded-lg border bg-muted/50 p-3 text-xs text-muted-foreground">
             <p className="font-medium text-foreground mb-1.5">Demo Accounts</p>
             <div className="space-y-0.5">
               <p>admin@school.com / admin123</p>
